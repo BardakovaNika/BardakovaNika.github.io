@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Криптограмма</title>
+    <style>
+        /* ===== Базовые стили – светлая бежевая тема ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; /* убираем прокрутку страницы, будет внутри контейнера */
+        }
+
+        body {
+            background: #f0ebe3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 8px;
+            margin: 0;
+            background-image: radial-gradient(ellipse at 50% 30%, #faf3e8 0%, #e8dfd2 100%);
+            min-height: 100vh;
+        }
+
+        .game-container {
+            max-width: 540px;
+            width: 100%;
+            height: 100vh;           /* занимает всю высоту экрана */
+            max-height: 780px;       /* ограничение для больших экранов */
+            background: #fcf7f0;
+            border-radius: 32px;
+            box-shadow: 0 8px 32px rgba(120, 90, 60, 0.12), inset 0 1px 0 rgba(255, 245, 230, 0.8);
+            border: 1px solid #ede4d6;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;        /* содержимое не вылезает за границы */
+        }
+
+        /* ===== Верхняя секция ===== */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            flex-shrink: 0;
+            background: #f6efe6;
+            border-bottom: 1px solid #e2d5c4;
+            border-radius: 32px 32px 0 0;
+        }
+
+        .top-section .home-btn {
+            flex-shrink: 0;
+        }
+
+        .top-section .rules-btn {
+            flex-shrink: 0;
+        }
+
+        .top-section .mistakes-group {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: #5a4a3a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            color: #5a4a3a;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px;
+            line-height: 1;
+            touch-action: manipulation;
+            font-weight: 400;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            color: #3d3328;
+        }
+
+        .icon-btn.home-btn {
+            font-size: 1.5rem;
+        }
+
+        .mistakes-indicators {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .mistake-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #d5c6b4;
+            background: transparent;
+            transition: 0.2s;
+        }
+
+        .mistake-circle.filled {
+            background: #c0392b;
+            border-color: #c0392b;
+            box-shadow: 0 0 8px rgba(192, 57, 43, 0.2);
+        }
+
+        /* ===== Средняя секция – гибкая, занимает оставшееся место ===== */
+        .middle-section {
+            flex: 1 1 auto;        /* растягивается, но может сжиматься */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 10px;
+            background: transparent;
+            min-height: 50px;       /* минимальная высота */
+        }
+
+        .phrase-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px 3px;
+            background: transparent;
+            padding: 6px 4px;
+            width: 100%;
+        }
+
+        /* ===== Ячейки – только буква с подчёркиванием ===== */
+        .cell {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            padding: 0 2px;
+            width: auto;
+            min-width: 28px;
+            height: auto;
+            border-bottom: 2px solid #b8b0a0;
+            margin: 0 1px;
+            transition: border-color 0.2s, border-width 0.2s, background 0.2s, transform 0.2s;
+            position: relative;
+        }
+
+        .cell .letter {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #3d3328;
+            line-height: 1.2;
+            margin-bottom: 1px;
+            order: 1;
+            min-height: 1.8rem;
+        }
+
+        .cell .number-hint {
+            font-size: 0.5rem;
+            font-weight: 400;
+            color: #a6927e;
+            line-height: 1;
+            order: 2;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin-top: 0;
+        }
+
+        .cell.filled .letter {
+            color: #2c241c;
+        }
+
+        .cell.active {
+            border-bottom-color: #4CAF50;
+            border-bottom-width: 4px;
+            background: rgba(76, 175, 80, 0.15);
+            transform: scale(1.02);
+        }
+
+        .cell.revealed .letter {
+            color: #4a6b3a;
+        }
+
+        .cell.space {
+            display: inline-block;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            min-width: 14px;
+            width: 14px;
+            margin: 0 2px;
+            border-bottom: none !important;
+            padding: 0;
+        }
+        .cell.space .letter,
+        .cell.space .number-hint {
+            display: none;
+        }
+
+        /* ===== Нижняя секция – фиксированной высоты, чтобы клавиатура всегда была видна ===== */
+        .bottom-section {
+            flex-shrink: 0;          /* не сжимается */
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px 12px 12px;
+            background: transparent;
+            border-top: none;
+            border-radius: 0 0 32px 32px;
+        }
+
+        .hint-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 2px 0 0;
+            flex-shrink: 0;
+        }
+
+        .keyboard-area {
+            background: #e8ddd0;
+            border-radius: 14px;
+            padding: 6px 4px 4px 4px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+            margin-top: 2px;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+        }
+
+        .key-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px 3px;
+            flex-wrap: nowrap;
+        }
+
+        .key {
+            width: 30px;
+            height: 34px;
+            background: #f2e8dc;
+            border: 1px solid #d5c6b4;
+            border-radius: 6px;
+            color: #3d3328;
+            font-weight: 500;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            text-transform: uppercase;
+            user-select: none;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+
+        .key:hover {
+            background: #e6d8c8;
+            border-color: #b8a58b;
+        }
+
+        .key:active {
+            transform: scale(0.92);
+        }
+
+        .key.used {
+            opacity: 0.2;
+            pointer-events: none;
+            filter: grayscale(0.8);
+            transform: scale(0.94);
+        }
+
+        .key.absent {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: grayscale(1);
+            background: #f0e0d8;
+            border-color: #dcc8b8;
+        }
+
+        .nav-arrow {
+            width: 30px;
+            height: 34px;
+            background: #ede3d6;
+            border: 1px solid #d5c6b4;
+            border-radius: 6px;
+            color: #5a4a3a;
+            font-size: 1rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            touch-action: manipulation;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            user-select: none;
+        }
+
+        .nav-arrow:hover:not(:disabled) {
+            background: #e6d8c8;
+            border-color: #b8a58b;
+        }
+
+        .nav-arrow:active {
+            transform: scale(0.92);
+        }
+
+        .nav-arrow:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .hint-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #5a4a3a;
+            font-size: 0.8rem;
+            position: relative;
+        }
+
+        .hint-btn {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(145deg, #5A9DE0, #3A7BC8);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(74, 144, 217, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+            touch-action: manipulation;
+            padding: 0;
+        }
+
+        .hint-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 144, 217, 0.4), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+            background: linear-gradient(145deg, #4A8FD9, #2E6BB5);
+        }
+
+        .hint-btn:active:not(:disabled) {
+            transform: scale(0.94);
+            box-shadow: 0 2px 4px rgba(74, 144, 217, 0.2), inset 0 -1px 2px rgba(0,0,0,0.2);
+        }
+
+        .hint-btn:disabled {
+            opacity: 0.35;
+            pointer-events: none;
+            filter: grayscale(0.3);
+            transform: scale(0.96);
+        }
+
+        .hint-btn .icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .hint-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border: 2px solid #3A7BC8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #3A7BC8;
+            padding: 0 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            line-height: 1;
+        }
+
+        /* ===== ЗВЁЗДЫ ===== */
+        .modal-stars {
+            font-size: 2.4rem;
+            letter-spacing: 6px;
+            margin: 4px 0 12px;
+        }
+
+        .star {
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .star.active {
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        .star.inactive {
+            color: #ccc;
+            opacity: 0.4;
+        }
+
+        /* ===== Модальные окна ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(60, 50, 40, 0.5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fcf7f0;
+            border: 1px solid #dacfc0;
+            border-radius: 36px;
+            padding: 32px 24px 28px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(80, 60, 40, 0.2);
+            animation: modalFade 0.3s ease-out;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.92) translateY(16px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-title {
+            font-size: 2.0rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #3d3328;
+        }
+        .modal-title.win { color: #8a7a5a; }
+        .modal-title.lose { color: #b55a4a; }
+
+        .modal-word {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #3d3328;
+            background: #f2eadf;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 6px auto 14px;
+            border: 1px solid #d5c6b4;
+            letter-spacing: 3px;
+        }
+
+        .modal-difficulty {
+            font-size: 1.0rem;
+            color: #6a5a4a;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        .modal-bonus {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #5a7a4a;
+            background: #e8f0e0;
+            border: 1px solid #c8d8b8;
+            border-radius: 60px;
+            padding: 6px 20px;
+            display: inline-block;
+            margin: 10px 0 18px;
+        }
+
+        .modal-subtitle {
+            font-size: 1.0rem;
+            color: #6a5a4a;
+            margin: 4px 0 14px;
+            opacity: 0.8;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .modal-btn {
+            background: #f2e8dc;
+            border: 1px solid #d5c6b4;
+            color: #3d3328;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1 1 auto;
+            min-width: 110px;
+            touch-action: manipulation;
+        }
+
+        .modal-btn:hover {
+            background: #e6d8c8;
+            border-color: #b8a58b;
+        }
+
+        .modal-btn.primary {
+            background: #d4c4b0;
+            border-color: #b8a58b;
+            color: #2c241c;
+        }
+        .modal-btn.primary:hover {
+            background: #c8b8a0;
+        }
+
+        .modal-btn.secondary {
+            background: #e8ded0;
+            border-color: #cdbcac;
+            color: #4a3d32;
+        }
+        .modal-btn.secondary:hover {
+            background: #ddd0c0;
+        }
+
+        .modal-btn.danger {
+            background: #f0d8d0;
+            border-color: #dbb8a8;
+            color: #8a4a3a;
+        }
+        .modal-btn.danger:hover {
+            background: #e8c8b8;
+        }
+
+        .modal-btn.ad {
+            background: #ede0c8;
+            border-color: #d4c0a8;
+            color: #5a4a32;
+        }
+        .modal-btn.ad:hover {
+            background: #e4d4b8;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 20px 0 24px;
+            justify-items: center;
+        }
+
+        .level-cell {
+            width: 48px;
+            height: 48px;
+            background: #f2e8dc;
+            border: 2px solid #d5c6b4;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3d3328;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .level-cell:hover:not(.locked) {
+            background: #e6d8c8;
+            border-color: #b8a58b;
+        }
+
+        .level-cell.current {
+            border-color: #b8a58b;
+            background: #d4c4b0;
+            color: #2c241c;
+            box-shadow: 0 0 0 3px #ede3d6;
+        }
+
+        .level-cell.completed {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .level-cell.locked {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(0.6);
+            color: #9a8a7a;
+        }
+
+        .level-cell .lock-icon {
+            font-size: 1.0rem;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: rgba(255,255,240,0.8);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #8a6a5a;
+        }
+
+        .modal-subtitle-levels {
+            font-size: 0.95rem;
+            color: #6a5a4a;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        .modal-box .modal-buttons-levels {
+            margin-top: 10px;
+            gap: 12px;
+        }
+
+        .rules-list {
+            text-align: left;
+            font-size: 0.95rem;
+            color: #3d3328;
+            line-height: 1.6;
+            margin: 16px 0 20px;
+            padding: 0 4px;
+        }
+
+        .rules-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            align-items: flex-start;
+        }
+
+        .rules-item .dot {
+            font-size: 1.2rem;
+            color: #8a7a5a;
+            flex-shrink: 0;
+            width: 24px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .rules-item .text {
+            flex: 1;
+        }
+
+        .rules-item strong {
+            color: #5a4a3a;
+        }
+
+        .rules-item .highlight {
+            background: #f0e8dc;
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .modal-btn.rules-btn-close {
+            background: #d4c4b0;
+            border-color: #b8a58b;
+            color: #2c241c;
+            font-weight: 600;
+        }
+
+        .modal-btn.rules-btn-close:hover {
+            background: #c8b8a0;
+        }
+
+        /* ===== АДАПТИВ ДЛЯ РАЗНЫХ ЭКРАНОВ ===== */
+
+        /* Планшеты и маленькие ноутбуки */
+        @media (max-height: 700px) {
+            .top-section {
+                padding: 8px 12px;
+            }
+            .top-section .mistakes-group {
+                font-size: 0.75rem;
+                gap: 6px;
+            }
+            .mistake-circle {
+                width: 10px;
+                height: 10px;
+            }
+            .icon-btn {
+                font-size: 1.1rem;
+            }
+            .icon-btn.home-btn {
+                font-size: 1.3rem;
+            }
+
+            .middle-section {
+                padding: 6px 8px;
+                min-height: 40px;
+            }
+            .phrase-row {
+                padding: 4px 4px;
+                gap: 4px 2px;
+            }
+            .cell {
+                min-width: 22px;
+                padding: 0 1px;
+                border-bottom-width: 2px;
+            }
+            .cell .letter {
+                font-size: 1.3rem;
+                min-height: 1.5rem;
+            }
+            .cell .number-hint {
+                font-size: 0.4rem;
+            }
+            .cell.space {
+                min-width: 10px;
+                width: 10px;
+            }
+
+            .bottom-section {
+                padding: 6px 10px 10px;
+                gap: 3px;
+            }
+            .hint-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+            }
+            .hint-btn .icon {
+                font-size: 1.2rem;
+            }
+            .hint-badge {
+                min-width: 18px;
+                height: 18px;
+                font-size: 0.6rem;
+                top: -4px;
+                right: -4px;
+                border-width: 1.5px;
+            }
+            .keyboard-area {
+                padding: 4px 3px 3px 3px;
+                border-radius: 10px;
+            }
+            .keyboard {
+                gap: 3px;
+            }
+            .key-row {
+                gap: 3px 2px;
+            }
+            .key {
+                width: 26px;
+                height: 30px;
+                font-size: 0.65rem;
+                border-radius: 4px;
+            }
+            .nav-arrow {
+                width: 26px;
+                height: 30px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Очень маленькие экраны (телефоны и маленькие ноутбуки) */
+        @media (max-height: 600px) {
+            .game-container {
+                max-height: 100vh;
+                border-radius: 16px;
+            }
+            .top-section {
+                padding: 4px 8px;
+                border-radius: 16px 16px 0 0;
+            }
+            .top-section .mistakes-group {
+                font-size: 0.65rem;
+                gap: 4px;
+            }
+            .mistake-circle {
+                width: 8px;
+                height: 8px;
+            }
+            .icon-btn {
+                font-size: 0.9rem;
+            }
+            .icon-btn.home-btn {
+                font-size: 1.1rem;
+            }
+
+            .middle-section {
+                padding: 4px 4px;
+                min-height: 30px;
+            }
+            .phrase-row {
+                padding: 2px 2px;
+                gap: 3px 2px;
+            }
+            .cell {
+                min-width: 18px;
+                padding: 0 1px;
+                border-bottom-width: 2px;
+            }
+            .cell .letter {
+                font-size: 1.0rem;
+                min-height: 1.2rem;
+            }
+            .cell .number-hint {
+                font-size: 0.35rem;
+            }
+            .cell.space {
+                min-width: 8px;
+                width: 8px;
+            }
+
+            .bottom-section {
+                padding: 4px 6px 6px;
+                gap: 2px;
+            }
+            .hint-btn {
+                width: 30px;
+                height: 30px;
+                border-radius: 6px;
+            }
+            .hint-btn .icon {
+                font-size: 1.0rem;
+            }
+            .hint-badge {
+                min-width: 16px;
+                height: 16px;
+                font-size: 0.5rem;
+                top: -3px;
+                right: -3px;
+                border-width: 1.5px;
+            }
+            .keyboard-area {
+                padding: 2px;
+                border-radius: 6px;
+            }
+            .keyboard {
+                gap: 2px;
+            }
+            .key-row {
+                gap: 2px 1px;
+            }
+            .key {
+                width: 22px;
+                height: 26px;
+                font-size: 0.55rem;
+                border-radius: 4px;
+            }
+            .nav-arrow {
+                width: 22px;
+                height: 26px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Большие экраны (десктоп) */
+        @media (min-width: 600px) and (min-height: 700px) {
+            .game-container {
+                max-height: 780px;
+                height: 90vh; /* не на всю высоту, чтобы было красиво */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="app">
+        <!-- Верхняя секция -->
+        <div class="top-section">
+            <button class="icon-btn home-btn" id="homeBtn" aria-label="Уровни">⌂</button>
+            <div class="mistakes-group">
+                <span>Ошибки</span>
+                <div class="mistakes-indicators" id="mistakesIndicators">
+                    <span class="mistake-circle" data-index="0"></span>
+                    <span class="mistake-circle" data-index="1"></span>
+                    <span class="mistake-circle" data-index="2"></span>
+                </div>
+            </div>
+            <button class="icon-btn" id="rulesBtn" aria-label="Как играть">?</button>
+        </div>
+
+        <!-- Средняя секция – слово с подчёркиванием -->
+        <div class="middle-section">
+            <div class="phrase-row" id="phraseRow"></div>
+        </div>
+
+        <!-- Нижняя секция -->
+        <div class="bottom-section">
+            <div class="hint-wrapper">
+                <div class="hint-container">
+                    <button class="hint-btn" id="hintBtn">
+                        <span class="icon">💡</span>
+                        <span class="hint-badge" id="hintBadge">3</span>
+                    </button>
+                </div>
+            </div>
+            <div class="keyboard-area">
+                <div class="keyboard" id="keyboard"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна (без изменений) -->
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal-box">
+            <div class="modal-title" style="color:#8a7a5a; font-size:1.8rem;">Как играть</div>
+            <div class="rules-list">
+                <div class="rules-item">
+                    <span class="dot">•</span>
+                    <span class="text">Каждая буква заменена <strong>числом</strong>.<br>Одинаковые числа — одинаковые буквы.</span>
+                </div>
+                <div class="rules-item">
+                    <span class="dot">•</span>
+                    <span class="text">Нажмите на пропуск, затем на букву. Если угадали — заполнятся <strong>все</strong> такие же ячейки.</span>
+                </div>
+                <div class="rules-item">
+                    <span class="dot">•</span>
+                    <span class="text">Серые клавиши — буквы, которых нет в этой фразе.</span>
+                </div>
+                <div class="rules-item">
+                    <span class="dot">•</span>
+                    <span class="text">Можно сделать <strong>3 ошибки</strong>. Не знаете букву — нажмите <span class="highlight">подсказку</span>.</span>
+                </div>
+                <div class="rules-item">
+                    <span class="dot">•</span>
+                    <span class="text">Разгадайте всю фразу, чтобы пройти уровень!</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn rules-btn-close" id="rulesCloseBtn">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="winModal">
+        <div class="modal-box">
+            <div class="modal-title win">Разгадано!</div>
+            <div class="modal-stars" id="modalStars"></div>
+            <div class="modal-word" id="modalWord">—</div>
+            <div class="modal-difficulty" id="modalDifficulty">Отлично!</div>
+            <div class="modal-bonus">💡 +2 за уровень</div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="winLevelsBtn">Уровни</button>
+                <button class="modal-btn primary" id="modalNextBtn">Дальше</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loseModal">
+        <div class="modal-box">
+            <div class="modal-title lose">Ошибки закончились</div>
+            <div class="modal-subtitle">Вы использовали все 3 ошибки.</div>
+            <div class="modal-word" id="loseWord" style="font-size:1.8rem; margin:4px auto 12px;">—</div>
+            <div class="modal-buttons" style="flex-direction:column; align-items:stretch; gap:10px;">
+                <button class="modal-btn ad" id="loseContinueBtn">Продолжить — посмотреть рекламу</button>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button class="modal-btn danger" id="loseRetryBtn">Ещё раз</button>
+                    <button class="modal-btn secondary" id="loseLevelsBtn">Уровни</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="levelsModal">
+        <div class="modal-box">
+            <div class="modal-title" style="color:#8a7a5a; font-size:1.8rem;">Криптограмма</div>
+            <div class="modal-subtitle-levels" id="levelsSubtitle">Уровень 1 · Очень легко</div>
+            <div class="levels-grid" id="levelsGrid"></div>
+            <div class="modal-buttons modal-buttons-levels">
+                <button class="modal-btn secondary" id="levelsCloseBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== JavaScript без изменений =====
+        (function() {
+            'use strict';
+
+            const LEVELS = [
+                { phrase: 'КОТ' },
+                { phrase: 'ДОМ' },
+                { phrase: 'МИР' },
+                { phrase: 'ЛЕС' },
+                { phrase: 'ГОД' }
+            ];
+
+            const PRE_REVEAL_RATIO = 0.3;
+            let totalHints = 3;
+            const MAX_MISTAKES = 3;
+
+            let currentLevel = 0;
+            let phrase = '';
+            let letters = [];
+            let cipherMap = {};
+            let reverseMap = {};
+            let mistakes = 0;
+            let activeCellIndex = -1;
+            let gameFinished = false;
+            let usedLetters = new Set();
+            let absentLetters = new Set();
+            let completedLevels = new Array(LEVELS.length).fill(false);
+
+            const STORAGE_KEY = 'cryptogram_completed';
+
+            function loadProgress() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length === LEVELS.length) {
+                            completedLevels = parsed;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            function saveProgress() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(completedLevels));
+                } catch (e) {}
+            }
+
+            // ===== DOM =====
+            const phraseRow = document.getElementById('phraseRow');
+            const keyboardEl = document.getElementById('keyboard');
+            const hintBtn = document.getElementById('hintBtn');
+            const hintBadge = document.getElementById('hintBadge');
+            const mistakesIndicators = document.getElementById('mistakesIndicators');
+            const homeBtn = document.getElementById('homeBtn');
+
+            const winModal = document.getElementById('winModal');
+            const loseModal = document.getElementById('loseModal');
+            const levelsModal = document.getElementById('levelsModal');
+            const rulesModal = document.getElementById('rulesModal');
+            const rulesBtn = document.getElementById('rulesBtn');
+            const rulesCloseBtn = document.getElementById('rulesCloseBtn');
+
+            const modalWord = document.getElementById('modalWord');
+            const modalDifficulty = document.getElementById('modalDifficulty');
+            const modalNextBtn = document.getElementById('modalNextBtn');
+            const winLevelsBtn = document.getElementById('winLevelsBtn');
+            const loseLevelsBtn = document.getElementById('loseLevelsBtn');
+            const loseWord = document.getElementById('loseWord');
+            const loseContinueBtn = document.getElementById('loseContinueBtn');
+            const loseRetryBtn = document.getElementById('loseRetryBtn');
+            const levelsGrid = document.getElementById('levelsGrid');
+            const levelsSubtitle = document.getElementById('levelsSubtitle');
+            const levelsCloseBtn = document.getElementById('levelsCloseBtn');
+            const modalStars = document.getElementById('modalStars');
+
+            let previousModal = null;
+
+            function showRules() { rulesModal.classList.add('active'); }
+            function hideRules() { rulesModal.classList.remove('active'); }
+
+            function checkFirstLaunch() {
+                const hasSeenRules = localStorage.getItem('cryptogram_rules_seen');
+                if (!hasSeenRules) {
+                    setTimeout(() => { showRules(); }, 500);
+                    localStorage.setItem('cryptogram_rules_seen', 'true');
+                }
+            }
+
+            function getLetterFrequency(phrase) {
+                const freq = {};
+                for (const ch of phrase) {
+                    if (ch !== ' ' && ch !== 'Ё') {
+                        const upper = ch.toUpperCase();
+                        freq[upper] = (freq[upper] || 0) + 1;
+                    }
+                }
+                return freq;
+            }
+
+            function generateCipher(phrase) {
+                const freq = getLetterFrequency(phrase);
+                const uniqueLetters = Object.keys(freq);
+                const numbers = Array.from({ length: 26 }, (_, i) => i + 1);
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                const map = {};
+                const usedNumbers = new Set();
+                for (let i = 0; i < uniqueLetters.length; i++) {
+                    let num;
+                    let attempts = 0;
+                    do {
+                        num = numbers[i % numbers.length];
+                        attempts++;
+                        if (attempts > 100) break;
+                    } while (usedNumbers.has(num));
+                    usedNumbers.add(num);
+                    map[uniqueLetters[i]] = num;
+                }
+                return map;
+            }
+
+            function findNextActive(start = 0) {
+                for (let i = start; i < letters.length; i++) {
+                    if (!letters[i].isSpace && !letters[i].revealed) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            function findPrevActive(start) {
+                for (let i = start - 1; i >= 0; i--) {
+                    if (!letters[i].isSpace && !letters[i].revealed) {
+                        return i;
+                    }
+                }
+                for (let i = letters.length - 1; i >= 0; i--) {
+                    if (!letters[i].isSpace && !letters[i].revealed) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            function isLevelUnlocked(levelIndex) {
+                if (levelIndex === 0) return true;
+                return completedLevels[levelIndex - 1] === true;
+            }
+
+            function updateMistakesIndicators() {
+                const circles = mistakesIndicators.querySelectorAll('.mistake-circle');
+                circles.forEach((circle, idx) => {
+                    if (idx < mistakes) {
+                        circle.classList.add('filled');
+                    } else {
+                        circle.classList.remove('filled');
+                    }
+                });
+            }
+
+            function initLevel(levelIndex) {
+                const levelData = LEVELS[levelIndex];
+                if (!levelData) return;
+
+                const rawPhrase = levelData.phrase;
+                phrase = rawPhrase;
+                const cipher = generateCipher(rawPhrase);
+                cipherMap = cipher;
+                reverseMap = {};
+                for (const [letter, num] of Object.entries(cipher)) {
+                    reverseMap[num] = letter;
+                }
+
+                letters = [];
+                for (const ch of rawPhrase) {
+                    const upper = ch.toUpperCase();
+                    if (ch === ' ') {
+                        letters.push({ char: ' ', number: null, revealed: true, isSpace: true });
+                    } else if (upper === 'Ё') {
+                        const eChar = 'Е';
+                        const num = cipher[eChar] || cipher[upper];
+                        letters.push({ char: eChar, number: num, revealed: false, isSpace: false });
+                    } else {
+                        const num = cipher[upper];
+                        letters.push({ char: upper, number: num, revealed: false, isSpace: false });
+                    }
+                }
+
+                mistakes = 0;
+                gameFinished = false;
+                usedLetters = new Set();
+                absentLetters = new Set();
+
+                const allLetters = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+                const present = new Set(Object.keys(cipher));
+                for (const ch of allLetters) {
+                    if (!present.has(ch)) absentLetters.add(ch);
+                }
+                absentLetters.add('Ё');
+
+                const indices = [];
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace) {
+                        indices.push(i);
+                    }
+                }
+                const total = indices.length;
+                if (total > 0) {
+                    let toReveal = Math.max(1, Math.floor(total * PRE_REVEAL_RATIO));
+                    if (toReveal >= total) toReveal = total - 1;
+                    if (toReveal < 1) toReveal = 1;
+                    for (let i = indices.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [indices[i], indices[j]] = [indices[j], indices[i]];
+                    }
+                    const revealedIndices = indices.slice(0, toReveal);
+                    for (const idx of revealedIndices) {
+                        letters[idx].revealed = true;
+                    }
+                    for (const idx of revealedIndices) {
+                        const letter = letters[idx].char;
+                        if (letter) usedLetters.add(letter);
+                    }
+                }
+
+                activeCellIndex = findNextActive(0);
+                if (activeCellIndex === -1) {
+                    gameFinished = true;
+                }
+
+                winModal.classList.remove('active');
+                loseModal.classList.remove('active');
+                levelsModal.classList.remove('active');
+                previousModal = null;
+
+                updateUI();
+                hintBtn.disabled = false;
+            }
+
+            function renderPhrase() {
+                phraseRow.innerHTML = '';
+                for (let i = 0; i < letters.length; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (letters[i].isSpace) {
+                        cell.classList.add('space');
+                    } else {
+                        const letterSpan = document.createElement('div');
+                        letterSpan.className = 'letter';
+                        if (letters[i].revealed) {
+                            letterSpan.textContent = letters[i].char;
+                            cell.classList.add('filled');
+                        } else {
+                            letterSpan.textContent = '\u00A0';
+                        }
+                        cell.appendChild(letterSpan);
+
+                        const numSpan = document.createElement('div');
+                        numSpan.className = 'number-hint';
+                        numSpan.textContent = letters[i].number;
+                        cell.appendChild(numSpan);
+
+                        if (i === activeCellIndex && !gameFinished) {
+                            cell.classList.add('active');
+                        }
+                    }
+                    phraseRow.appendChild(cell);
+                }
+            }
+
+            function renderKeyboard() {
+                keyboardEl.innerHTML = '';
+                const rows = [
+                    'ЙЦУКЕНГШЩЗХЪ',
+                    'ФЫВАПРОЛДЖЭ',
+                    'ЯЧСМИТЬБЮЁ'
+                ];
+
+                rows.forEach((row, rowIndex) => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'key-row';
+
+                    if (rowIndex === rows.length - 1) {
+                        const leftArrow = document.createElement('div');
+                        leftArrow.className = 'nav-arrow';
+                        leftArrow.textContent = '◀';
+                        leftArrow.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            moveToPrevCell();
+                        });
+                        rowDiv.appendChild(leftArrow);
+                    }
+
+                    for (const ch of row) {
+                        const key = document.createElement('div');
+                        key.className = 'key';
+                        key.textContent = ch;
+
+                        if (usedLetters.has(ch)) {
+                            key.classList.add('used');
+                        } else if (absentLetters.has(ch)) {
+                            key.classList.add('absent');
+                        }
+
+                        key.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            handleKeyPress(ch);
+                        });
+
+                        rowDiv.appendChild(key);
+                    }
+
+                    if (rowIndex === rows.length - 1) {
+                        const rightArrow = document.createElement('div');
+                        rightArrow.className = 'nav-arrow';
+                        rightArrow.textContent = '▶';
+                        rightArrow.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            moveToNextCell();
+                        });
+                        rowDiv.appendChild(rightArrow);
+                    }
+
+                    keyboardEl.appendChild(rowDiv);
+                });
+            }
+
+            function updateUI() {
+                hintBadge.textContent = totalHints;
+                if (gameFinished || totalHints <= 0) {
+                    hintBtn.disabled = true;
+                } else {
+                    hintBtn.disabled = false;
+                }
+                updateMistakesIndicators();
+                renderPhrase();
+                renderKeyboard();
+            }
+
+            function renderStars() {
+                const maxStars = 3;
+                let activeStars = 3 - mistakes;
+                if (activeStars < 1) activeStars = 1;
+                if (activeStars > 3) activeStars = 3;
+
+                let html = '';
+                for (let i = 0; i < maxStars; i++) {
+                    const active = i < activeStars;
+                    html += `<span class="star ${active ? 'active' : 'inactive'}">★</span>`;
+                }
+                modalStars.innerHTML = html;
+            }
+
+            function showWinModal() {
+                completedLevels[currentLevel] = true;
+                saveProgress();
+                totalHints += 2;
+                modalWord.textContent = phrase;
+                let difficultyText = '';
+                if (mistakes === 0) difficultyText = 'Отлично!';
+                else if (mistakes === 1) difficultyText = 'Хорошо!';
+                else if (mistakes === 2) difficultyText = 'Неплохо';
+                else difficultyText = 'Сложно';
+                modalDifficulty.textContent = difficultyText;
+                renderStars();
+                winModal.classList.add('active');
+                previousModal = null;
+                hintBadge.textContent = totalHints;
+                if (totalHints <= 0) hintBtn.disabled = true;
+                else hintBtn.disabled = false;
+            }
+
+            function showLoseModal() {
+                loseWord.textContent = phrase;
+                loseModal.classList.add('active');
+                previousModal = null;
+            }
+
+            function openLevelsModal() {
+                if (winModal.classList.contains('active')) {
+                    previousModal = 'win';
+                    winModal.classList.remove('active');
+                } else if (loseModal.classList.contains('active')) {
+                    previousModal = 'lose';
+                    loseModal.classList.remove('active');
+                } else {
+                    previousModal = null;
+                }
+
+                const total = LEVELS.length;
+                const difficulty = 'Очень легко';
+                levelsSubtitle.textContent = `Уровень ${currentLevel+1} · ${difficulty}`;
+
+                levelsGrid.innerHTML = '';
+                for (let i = 0; i < total; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'level-cell';
+                    const unlocked = isLevelUnlocked(i);
+                    const completed = completedLevels[i];
+
+                    if (!unlocked) {
+                        cell.classList.add('locked');
+                        cell.innerHTML = `${i+1}<span class="lock-icon">🔒</span>`;
+                    } else {
+                        cell.textContent = i + 1;
+                        if (completed) cell.classList.add('completed');
+                        if (i === currentLevel) cell.classList.add('current');
+                        cell.addEventListener('click', function() {
+                            currentLevel = i;
+                            initLevel(currentLevel);
+                            winModal.classList.remove('active');
+                            loseModal.classList.remove('active');
+                            levelsModal.classList.remove('active');
+                            previousModal = null;
+                        });
+                    }
+                    levelsGrid.appendChild(cell);
+                }
+
+                levelsModal.classList.add('active');
+            }
+
+            function closeLevelsModal() {
+                levelsModal.classList.remove('active');
+                if (previousModal === 'win') {
+                    let allRevealed = true;
+                    for (const cell of letters) {
+                        if (!cell.isSpace && !cell.revealed) {
+                            allRevealed = false;
+                            break;
+                        }
+                    }
+                    if (gameFinished && allRevealed) {
+                        completedLevels[currentLevel] = true;
+                        saveProgress();
+                        showWinModal();
+                    } else {
+                        previousModal = null;
+                    }
+                } else if (previousModal === 'lose') {
+                    if (gameFinished && mistakes >= MAX_MISTAKES) {
+                        showLoseModal();
+                    } else {
+                        previousModal = null;
+                    }
+                }
+            }
+
+            function handleKeyPress(letter) {
+                if (gameFinished) return;
+                if (usedLetters.has(letter)) return;
+                if (absentLetters.has(letter)) {
+                    absentLetters.add(letter);
+                    updateUI();
+                    return;
+                }
+                if (!cipherMap[letter]) {
+                    absentLetters.add(letter);
+                    updateUI();
+                    return;
+                }
+
+                if (activeCellIndex === -1) return;
+
+                const cell = letters[activeCellIndex];
+                if (cell.isSpace || cell.revealed) {
+                    activeCellIndex = findNextActive(activeCellIndex + 1);
+                    if (activeCellIndex === -1) {
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    updateUI();
+                    return;
+                }
+
+                const expectedNumber = cell.number;
+                const expectedLetter = reverseMap[expectedNumber];
+
+                if (letter === expectedLetter) {
+                    const num = expectedNumber;
+                    let anyOpened = false;
+                    for (let i = 0; i < letters.length; i++) {
+                        if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
+                            letters[i].revealed = true;
+                            anyOpened = true;
+                        }
+                    }
+                    if (anyOpened) usedLetters.add(letter);
+                    activeCellIndex = findNextActive(0);
+                    if (activeCellIndex === -1) {
+                        gameFinished = true;
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    const won = checkWinCondition();
+                    if (!won) updateUI();
+                    else updateUI();
+                } else {
+                    mistakes++;
+                    if (mistakes >= MAX_MISTAKES) {
+                        gameFinished = true;
+                        revealAll();
+                        showLoseModal();
+                        hintBtn.disabled = true;
+                        updateUI();
+                        return;
+                    } else {
+                        updateUI();
+                    }
+                }
+            }
+
+            function revealAll() {
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace) letters[i].revealed = true;
+                }
+                gameFinished = true;
+            }
+
+            function checkWinCondition() {
+                let allRevealed = true;
+                for (const cell of letters) {
+                    if (!cell.isSpace && !cell.revealed) {
+                        allRevealed = false;
+                        break;
+                    }
+                }
+                if (allRevealed) {
+                    gameFinished = true;
+                    hintBtn.disabled = true;
+                    activeCellIndex = -1;
+                    updateUI();
+                    showWinModal();
+                    return true;
+                }
+                return false;
+            }
+
+            function useHint() {
+                if (gameFinished) return;
+                if (totalHints <= 0) return;
+
+                let idx = -1;
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace && !letters[i].revealed) {
+                        idx = i;
+                        break;
+                    }
+                }
+                if (idx === -1) return;
+
+                const num = letters[idx].number;
+                const letter = reverseMap[num];
+                let opened = false;
+
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
+                        letters[i].revealed = true;
+                        opened = true;
+                    }
+                }
+
+                if (opened) {
+                    usedLetters.add(letter);
+                    totalHints--;
+                    activeCellIndex = findNextActive(0);
+                    if (activeCellIndex === -1) {
+                        gameFinished = true;
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    const won = checkWinCondition();
+                    if (!won) {
+                        updateUI();
+                    } else {
+                        updateUI();
+                    }
+                }
+            }
+
+            function moveToNextCell() {
+                if (gameFinished) return;
+                const nextIdx = findNextActive(activeCellIndex + 1);
+                if (nextIdx === -1) {
+                    const fromStart = findNextActive(0);
+                    if (fromStart !== -1) {
+                        activeCellIndex = fromStart;
+                        updateUI();
+                    }
+                } else {
+                    activeCellIndex = nextIdx;
+                    updateUI();
+                }
+            }
+
+            function moveToPrevCell() {
+                if (gameFinished) return;
+                const prevIdx = findPrevActive(activeCellIndex);
+                if (prevIdx !== -1) {
+                    activeCellIndex = prevIdx;
+                    updateUI();
+                }
+            }
+
+            function goToNextLevel() {
+                winModal.classList.remove('active');
+                const nextLevel = currentLevel + 1;
+                if (nextLevel < LEVELS.length && isLevelUnlocked(nextLevel)) {
+                    currentLevel = nextLevel;
+                    initLevel(currentLevel);
+                } else if (nextLevel >= LEVELS.length) {
+                    completedLevels.fill(false);
+                    saveProgress();
+                    currentLevel = 0;
+                    initLevel(0);
+                } else {
+                    initLevel(currentLevel);
+                }
+            }
+
+            function init() {
+                loadProgress();
+
+                let startLevel = 0;
+                for (let i = 0; i < LEVELS.length; i++) {
+                    if (!completedLevels[i]) {
+                        startLevel = i;
+                        break;
+                    }
+                }
+                if (startLevel >= LEVELS.length) startLevel = 0;
+                currentLevel = startLevel;
+                initLevel(currentLevel);
+
+                homeBtn.addEventListener('click', openLevelsModal);
+                rulesBtn.addEventListener('click', showRules);
+                rulesCloseBtn.addEventListener('click', hideRules);
+                rulesModal.addEventListener('click', function(e) {
+                    if (e.target === rulesModal) hideRules();
+                });
+
+                hintBtn.addEventListener('click', useHint);
+                modalNextBtn.addEventListener('click', goToNextLevel);
+
+                winLevelsBtn.addEventListener('click', openLevelsModal);
+                loseLevelsBtn.addEventListener('click', openLevelsModal);
+
+                levelsCloseBtn.addEventListener('click', closeLevelsModal);
+                levelsModal.addEventListener('click', function(e) {
+                    if (e.target === levelsModal) closeLevelsModal();
+                });
+
+                loseContinueBtn.addEventListener('click', function() {
+                    loseModal.classList.remove('active');
+                    initLevel(currentLevel);
+                });
+                loseRetryBtn.addEventListener('click', function() {
+                    loseModal.classList.remove('active');
+                    initLevel(currentLevel);
+                });
+
+                checkFirstLaunch();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
