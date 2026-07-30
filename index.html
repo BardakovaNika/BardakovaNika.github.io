@@ -5,143 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Криптограмма</title>
     <style>
-        /* ===== Базовые стили – светлая бежевая тема ===== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
-
         html, body {
             height: 100%;
-            overflow: hidden; /* убираем прокрутку страницы, будет внутри контейнера */
-        }
-
-        body {
+            overflow: hidden;
             background: #f0ebe3;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            padding: 8px;
             margin: 0;
-            background-image: radial-gradient(ellipse at 50% 30%, #faf3e8 0%, #e8dfd2 100%);
-            min-height: 100vh;
+            padding: 0;
         }
-
+        .scale-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 450px;
+            height: 600px;
+            transform-origin: center center;
+            flex-shrink: 0;
+        }
         .game-container {
-            max-width: 540px;
-            width: 100%;
-            height: 100vh;           /* занимает всю высоту экрана */
-            max-height: 780px;       /* ограничение для больших экранов */
+            width: 450px;
+            height: 600px;
             background: #fcf7f0;
-            border-radius: 32px;
-            box-shadow: 0 8px 32px rgba(120, 90, 60, 0.12), inset 0 1px 0 rgba(255, 245, 230, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 4px 16px rgba(120,90,60,0.2);
             border: 1px solid #ede4d6;
             display: flex;
             flex-direction: column;
             padding: 0;
-            overflow: hidden;        /* содержимое не вылезает за границы */
+            overflow: hidden;
+            position: relative;
+            background-image: radial-gradient(ellipse at 50% 20%, #faf3e8 0%, #e8dfd2 100%);
+            flex-shrink: 0;
         }
-
-        /* ===== Верхняя секция ===== */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: confettiFall 4s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.5); }
+        }
         .top-section {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 8px 12px;
             flex-shrink: 0;
             background: #f6efe6;
             border-bottom: 1px solid #e2d5c4;
-            border-radius: 32px 32px 0 0;
+            border-radius: 24px 24px 0 0;
+            height: 60px; /* увеличили высоту, чтобы вместить две строки */
         }
-
-        .top-section .home-btn {
-            flex-shrink: 0;
-        }
-
-        .top-section .rules-btn {
-            flex-shrink: 0;
-        }
-
-        .top-section .mistakes-group {
-            flex: 1;
+        .top-section .left-buttons, .top-section .right-buttons {
             display: flex;
-            justify-content: center;
+            gap: 4px;
             align-items: center;
-            gap: 10px;
+        }
+        .top-section .mistakes-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
             color: #5a4a3a;
             font-size: 0.85rem;
             font-weight: 500;
-            letter-spacing: 0.3px;
+            flex: 1;
         }
-
         .icon-btn {
             background: transparent;
             border: none;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #5a4a3a;
             cursor: pointer;
             transition: 0.2s;
-            padding: 4px;
+            padding: 2px 4px;
             line-height: 1;
-            touch-action: manipulation;
-            font-weight: 400;
         }
-
-        .icon-btn:hover {
-            transform: scale(1.1);
-            color: #3d3328;
-        }
-
-        .icon-btn.home-btn {
-            font-size: 1.5rem;
-        }
-
+        .icon-btn:hover { transform: scale(1.1); color: #3d3328; }
+        .icon-btn.home-btn { font-size: 1.4rem; }
         .mistakes-indicators {
             display: flex;
-            gap: 5px;
-            align-items: center;
+            gap: 4px;
         }
-
         .mistake-circle {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             border: 2px solid #d5c6b4;
             background: transparent;
             transition: 0.2s;
         }
-
         .mistake-circle.filled {
             background: #c0392b;
             border-color: #c0392b;
-            box-shadow: 0 0 8px rgba(192, 57, 43, 0.2);
+            box-shadow: 0 0 6px rgba(192,57,43,0.2);
         }
-
-        /* ===== Средняя секция – гибкая, занимает оставшееся место ===== */
         .middle-section {
-            flex: 1 1 auto;        /* растягивается, но может сжиматься */
+            flex: 1 1 auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 10px;
+            padding: 4px 6px;
             background: transparent;
-            min-height: 50px;       /* минимальная высота */
+            min-height: 70px;
         }
-
         .phrase-row {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 5px 3px;
             background: transparent;
-            padding: 6px 4px;
+            padding: 2px;
             width: 100%;
         }
-
-        /* ===== Ячейки – только буква с подчёркиванием ===== */
         .cell {
             display: inline-flex;
             flex-direction: column;
@@ -149,98 +148,74 @@
             justify-content: flex-end;
             background: transparent;
             border: none;
-            box-shadow: none;
-            border-radius: 0;
             padding: 0 2px;
             width: auto;
-            min-width: 28px;
+            min-width: 32px;
             height: auto;
             border-bottom: 2px solid #b8b0a0;
             margin: 0 1px;
             transition: border-color 0.2s, border-width 0.2s, background 0.2s, transform 0.2s;
             position: relative;
+            cursor: pointer;
         }
-
         .cell .letter {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: #3d3328;
             line-height: 1.2;
             margin-bottom: 1px;
             order: 1;
-            min-height: 1.8rem;
+            min-height: 2rem;
         }
-
         .cell .number-hint {
             font-size: 0.5rem;
             font-weight: 400;
             color: #a6927e;
             line-height: 1;
             order: 2;
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
             margin-top: 0;
         }
-
-        .cell.filled .letter {
-            color: #2c241c;
-        }
-
+        .cell.filled .letter { color: #2c241c; }
         .cell.active {
             border-bottom-color: #4CAF50;
             border-bottom-width: 4px;
-            background: rgba(76, 175, 80, 0.15);
+            background: rgba(76,175,80,0.15);
             transform: scale(1.02);
         }
-
-        .cell.revealed .letter {
-            color: #4a6b3a;
-        }
-
         .cell.space {
             display: inline-block;
             background: transparent !important;
             border: none !important;
-            box-shadow: none !important;
-            min-width: 14px;
-            width: 14px;
+            min-width: 16px;
+            width: 16px;
             margin: 0 2px;
             border-bottom: none !important;
             padding: 0;
+            cursor: default;
         }
-        .cell.space .letter,
-        .cell.space .number-hint {
-            display: none;
-        }
-
-        /* ===== Нижняя секция – фиксированной высоты, чтобы клавиатура всегда была видна ===== */
+        .cell.space .letter, .cell.space .number-hint { display: none; }
         .bottom-section {
-            flex-shrink: 0;          /* не сжимается */
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
             gap: 4px;
-            padding: 8px 12px 12px;
+            padding: 4px 10px 10px;
             background: transparent;
-            border-top: none;
-            border-radius: 0 0 32px 32px;
+            border-radius: 0 0 24px 24px;
         }
-
         .hint-wrapper {
             display: flex;
             justify-content: flex-end;
             padding: 0 2px 0 0;
             flex-shrink: 0;
         }
-
         .keyboard-area {
             background: #e8ddd0;
-            border-radius: 14px;
-            padding: 6px 4px 4px 4px;
+            border-radius: 12px;
+            padding: 5px 4px 4px 4px;
             box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
             margin-top: 2px;
         }
-
         .keyboard {
             display: flex;
             flex-direction: column;
@@ -248,67 +223,61 @@
             gap: 4px;
             padding: 0;
         }
-
         .key-row {
             display: flex;
             justify-content: center;
             gap: 4px 3px;
             flex-wrap: nowrap;
         }
-
         .key {
-            width: 30px;
-            height: 34px;
+            width: 33px;
+            height: 38px;
             background: #f2e8dc;
             border: 1px solid #d5c6b4;
-            border-radius: 6px;
+            border-radius: 5px;
             color: #3d3328;
             font-weight: 500;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.1s;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             text-transform: uppercase;
             user-select: none;
             touch-action: manipulation;
             flex-shrink: 0;
         }
-
-        .key:hover {
-            background: #e6d8c8;
-            border-color: #b8a58b;
-        }
-
-        .key:active {
-            transform: scale(0.92);
-        }
-
-        .key.used {
-            opacity: 0.2;
+        .key:hover { background: #e6d8c8; border-color: #b8a58b; }
+        .key:active { transform: scale(0.92); }
+        .key.used { opacity: 0.4; pointer-events: none; filter: grayscale(0.6); }
+        .key.absent { opacity: 0.3; pointer-events: none; filter: grayscale(1); background: #f0e0d8; border-color: #dcc8b8; }
+        .key.correct {
+            background: #4CAF50 !important;
+            border-color: #4CAF50 !important;
+            color: white !important;
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(76,175,80,0.4);
             pointer-events: none;
-            filter: grayscale(0.8);
-            transform: scale(0.94);
         }
-
-        .key.absent {
-            opacity: 0.3;
-            pointer-events: none;
-            filter: grayscale(1);
-            background: #f0e0d8;
-            border-color: #dcc8b8;
+        .key.wrong {
+            background: #e74c3c !important;
+            border-color: #e74c3c !important;
+            color: white !important;
+            transform: scale(0.95);
+            box-shadow: 0 0 10px rgba(231,76,60,0.4);
         }
-
         .nav-arrow {
-            width: 30px;
-            height: 34px;
+            width: 33px;
+            height: 38px;
             background: #ede3d6;
             border: 1px solid #d5c6b4;
-            border-radius: 6px;
+            border-radius: 5px;
             color: #5a4a3a;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 300;
             display: flex;
             align-items: center;
@@ -320,21 +289,9 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             user-select: none;
         }
-
-        .nav-arrow:hover:not(:disabled) {
-            background: #e6d8c8;
-            border-color: #b8a58b;
-        }
-
-        .nav-arrow:active {
-            transform: scale(0.92);
-        }
-
-        .nav-arrow:disabled {
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
+        .nav-arrow:hover:not(:disabled) { background: #e6d8c8; border-color: #b8a58b; }
+        .nav-arrow:active { transform: scale(0.92); }
+        .nav-arrow:disabled { opacity: 0.3; pointer-events: none; }
         .hint-container {
             display: flex;
             align-items: center;
@@ -343,15 +300,14 @@
             font-size: 0.8rem;
             position: relative;
         }
-
         .hint-btn {
             position: relative;
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(145deg, #5A9DE0, #3A7BC8);
             border: none;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(74, 144, 217, 0.3), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+            box-shadow: 0 4px 8px rgba(74,144,217,0.3), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -360,242 +316,187 @@
             touch-action: manipulation;
             padding: 0;
         }
-
         .hint-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(74, 144, 217, 0.4), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+            box-shadow: 0 6px 12px rgba(74,144,217,0.4), inset 0 -2px 4px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
             background: linear-gradient(145deg, #4A8FD9, #2E6BB5);
         }
-
-        .hint-btn:active:not(:disabled) {
-            transform: scale(0.94);
-            box-shadow: 0 2px 4px rgba(74, 144, 217, 0.2), inset 0 -1px 2px rgba(0,0,0,0.2);
-        }
-
-        .hint-btn:disabled {
-            opacity: 0.35;
-            pointer-events: none;
-            filter: grayscale(0.3);
-            transform: scale(0.96);
-        }
-
-        .hint-btn .icon {
-            font-size: 1.4rem;
-            line-height: 1;
-            color: #fff;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
+        .hint-btn:active:not(:disabled) { transform: scale(0.94); }
+        .hint-btn:disabled { opacity: 0.35; pointer-events: none; filter: grayscale(0.3); transform: scale(0.96); }
+        .hint-btn .icon { font-size: 1.3rem; line-height: 1; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .hint-badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            min-width: 20px;
-            height: 20px;
+            min-width: 18px;
+            height: 18px;
             background: #ffffff;
             border: 2px solid #3A7BC8;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
             color: #3A7BC8;
-            padding: 0 4px;
+            padding: 0 3px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             line-height: 1;
         }
-
-        /* ===== ЗВЁЗДЫ ===== */
-        .modal-stars {
-            font-size: 2.4rem;
-            letter-spacing: 6px;
-            margin: 4px 0 12px;
-        }
-
-        .star {
-            display: inline-block;
-            transition: 0.3s;
-        }
-
-        .star.active {
-            color: #FFD700;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-        }
-
-        .star.inactive {
-            color: #ccc;
-            opacity: 0.4;
-        }
-
-        /* ===== Модальные окна ===== */
+        .modal-stars { font-size: 2.0rem; letter-spacing: 5px; margin: 2px 0 10px; }
+        .star { display: inline-block; transition: 0.3s; }
+        .star.active { color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+        .star.inactive { color: #ccc; opacity: 0.4; }
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(60, 50, 40, 0.5);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(60,50,40,0.5);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 20px;
+            padding: 16px;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active { display: flex; }
         .modal-box {
             background: #fcf7f0;
             border: 1px solid #dacfc0;
-            border-radius: 36px;
-            padding: 32px 24px 28px;
-            max-width: 400px;
+            border-radius: 32px;
+            padding: 28px 20px 24px;
+            max-width: 340px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(80, 60, 40, 0.2);
+            box-shadow: 0 20px 60px rgba(80,60,40,0.2);
             animation: modalFade 0.3s ease-out;
         }
-
         @keyframes modalFade {
             from { opacity: 0; transform: scale(0.92) translateY(16px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
-
-        .modal-title {
-            font-size: 2.0rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: #3d3328;
-        }
+        .modal-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; color: #3d3328; }
         .modal-title.win { color: #8a7a5a; }
         .modal-title.lose { color: #b55a4a; }
-
         .modal-word {
-            font-size: 2.4rem;
+            font-size: 2.0rem;
             font-weight: 700;
             color: #3d3328;
             background: #f2eadf;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 8px 16px;
+            border-radius: 16px;
             display: inline-block;
-            margin: 6px auto 14px;
+            margin: 4px auto 10px;
             border: 1px solid #d5c6b4;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
-
-        .modal-difficulty {
-            font-size: 1.0rem;
-            color: #6a5a4a;
-            margin-bottom: 4px;
-            opacity: 0.8;
-        }
-
+        .modal-difficulty { font-size: 0.9rem; color: #6a5a4a; margin-bottom: 4px; opacity: 0.8; }
         .modal-bonus {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #5a7a4a;
             background: #e8f0e0;
             border: 1px solid #c8d8b8;
-            border-radius: 60px;
-            padding: 6px 20px;
+            border-radius: 40px;
+            padding: 4px 16px;
             display: inline-block;
-            margin: 10px 0 18px;
+            margin: 6px 0 14px;
         }
-
-        .modal-subtitle {
-            font-size: 1.0rem;
-            color: #6a5a4a;
-            margin: 4px 0 14px;
-            opacity: 0.8;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
+        .modal-subtitle { font-size: 0.9rem; color: #6a5a4a; margin: 4px 0 14px; opacity: 0.8; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
         .modal-btn {
-            background: #f2e8dc;
-            border: 1px solid #d5c6b4;
-            color: #3d3328;
-            padding: 12px 28px;
-            border-radius: 60px;
+            padding: 10px 20px;
+            border-radius: 40px;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: 0.2s;
             flex: 1 1 auto;
-            min-width: 110px;
+            min-width: 90px;
             touch-action: manipulation;
+            text-align: center;
+            border: none;
         }
-
-        .modal-btn:hover {
-            background: #e6d8c8;
-            border-color: #b8a58b;
-        }
-
-        .modal-btn.primary {
-            background: #d4c4b0;
-            border-color: #b8a58b;
-            color: #2c241c;
-        }
-        .modal-btn.primary:hover {
-            background: #c8b8a0;
-        }
-
-        .modal-btn.secondary {
-            background: #e8ded0;
-            border-color: #cdbcac;
-            color: #4a3d32;
-        }
-        .modal-btn.secondary:hover {
-            background: #ddd0c0;
-        }
-
-        .modal-btn.danger {
-            background: #f0d8d0;
-            border-color: #dbb8a8;
-            color: #8a4a3a;
-        }
-        .modal-btn.danger:hover {
-            background: #e8c8b8;
-        }
-
+        .modal-btn:hover { transform: translateY(-2px); }
         .modal-btn.ad {
-            background: #ede0c8;
-            border-color: #d4c0a8;
-            color: #5a4a32;
+            background: linear-gradient(145deg, #4A8FD9, #2E6BB5);
+            color: white;
+            box-shadow: 0 4px 8px rgba(46,107,181,0.4);
         }
-        .modal-btn.ad:hover {
-            background: #e4d4b8;
+        .modal-btn.ad:hover { background: linear-gradient(145deg, #3A7BC8, #1E5A9E); }
+        .modal-btn.retry {
+            background: linear-gradient(145deg, #4CAF50, #2E7D32);
+            color: white;
+            box-shadow: 0 4px 8px rgba(46,125,50,0.4);
         }
-
+        .modal-btn.retry:hover { background: linear-gradient(145deg, #43A047, #1B5E20); }
+        .modal-btn.secondary {
+            background: linear-gradient(145deg, #e8ded0, #cdbcac);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            color: #3d3328;
+        }
+        .modal-btn.secondary:hover { background: linear-gradient(145deg, #ddd0c0, #c0b0a0); }
+        .modal-btn.rules-btn-close {
+            background: linear-gradient(145deg, #d4c4b0, #b8a58b);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            color: #2c241c;
+            font-weight: 600;
+        }
+        .modal-btn.rules-btn-close:hover { background: linear-gradient(145deg, #c8b8a0, #a89078); }
+        .modal-btn.close-settings, .modal-btn.close-levels {
+            background: linear-gradient(145deg, #e8ded0, #cdbcac);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            color: #3d3328;
+        }
+        .modal-btn.close-settings:hover, .modal-btn.close-levels:hover { background: linear-gradient(145deg, #ddd0c0, #c0b0a0); }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 34px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: #4CAF50; }
+        input:checked + .slider:before { transform: translateX(20px); }
         .levels-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin: 20px 0 24px;
+            gap: 10px;
+            margin: 16px 0 20px;
             justify-items: center;
         }
-
         .level-cell {
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             background: #f2e8dc;
             border: 2px solid #d5c6b4;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1.0rem;
             font-weight: 600;
             color: #3d3328;
             cursor: pointer;
@@ -604,369 +505,101 @@
             position: relative;
             touch-action: manipulation;
         }
-
-        .level-cell:hover:not(.locked) {
-            background: #e6d8c8;
-            border-color: #b8a58b;
-        }
-
-        .level-cell.current {
-            border-color: #b8a58b;
-            background: #d4c4b0;
-            color: #2c241c;
-            box-shadow: 0 0 0 3px #ede3d6;
-        }
-
-        .level-cell.completed {
-            border-color: #4CAF50;
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .level-cell.locked {
-            opacity: 0.35;
-            cursor: not-allowed;
-            pointer-events: none;
-            filter: grayscale(0.6);
-            color: #9a8a7a;
-        }
-
-        .level-cell .lock-icon {
-            font-size: 1.0rem;
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: rgba(255,255,240,0.8);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: #8a6a5a;
-        }
-
-        .modal-subtitle-levels {
-            font-size: 0.95rem;
-            color: #6a5a4a;
-            opacity: 0.6;
-            margin-top: 4px;
-        }
-
-        .modal-box .modal-buttons-levels {
-            margin-top: 10px;
-            gap: 12px;
-        }
-
+        .level-cell:hover:not(.locked) { background: #e6d8c8; border-color: #b8a58b; }
+        .level-cell.current { border-color: #b8a58b; background: #d4c4b0; color: #2c241c; box-shadow: 0 0 0 3px #ede3d6; }
+        .level-cell.completed { border-color: #4CAF50; background: #e8f5e9; color: #2e7d32; }
+        .level-cell.locked { opacity: 0.35; cursor: not-allowed; pointer-events: none; filter: grayscale(0.6); color: #9a8a7a; }
+        .level-cell .lock-icon { font-size: 0.8rem; position: absolute; top: -5px; right: -5px; background: rgba(255,255,240,0.8); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #8a6a5a; }
+        .modal-subtitle-levels { font-size: 0.85rem; color: #6a5a4a; opacity: 0.6; margin-top: 4px; }
         .rules-list {
             text-align: left;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #3d3328;
-            line-height: 1.6;
-            margin: 16px 0 20px;
+            line-height: 1.5;
+            margin: 12px 0 16px;
             padding: 0 4px;
         }
-
         .rules-item {
             display: flex;
-            gap: 10px;
-            margin-bottom: 14px;
+            gap: 8px;
+            margin-bottom: 10px;
             align-items: flex-start;
         }
-
-        .rules-item .dot {
-            font-size: 1.2rem;
-            color: #8a7a5a;
-            flex-shrink: 0;
-            width: 24px;
-            text-align: center;
-            margin-top: 2px;
-        }
-
-        .rules-item .text {
-            flex: 1;
-        }
-
-        .rules-item strong {
-            color: #5a4a3a;
-        }
-
-        .rules-item .highlight {
-            background: #f0e8dc;
-            padding: 0 4px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .modal-btn.rules-btn-close {
-            background: #d4c4b0;
-            border-color: #b8a58b;
-            color: #2c241c;
-            font-weight: 600;
-        }
-
-        .modal-btn.rules-btn-close:hover {
-            background: #c8b8a0;
-        }
-
-        /* ===== АДАПТИВ ДЛЯ РАЗНЫХ ЭКРАНОВ ===== */
-
-        /* Планшеты и маленькие ноутбуки */
-        @media (max-height: 700px) {
-            .top-section {
-                padding: 8px 12px;
-            }
-            .top-section .mistakes-group {
-                font-size: 0.75rem;
-                gap: 6px;
-            }
-            .mistake-circle {
-                width: 10px;
-                height: 10px;
-            }
-            .icon-btn {
-                font-size: 1.1rem;
-            }
-            .icon-btn.home-btn {
-                font-size: 1.3rem;
-            }
-
-            .middle-section {
-                padding: 6px 8px;
-                min-height: 40px;
-            }
-            .phrase-row {
-                padding: 4px 4px;
-                gap: 4px 2px;
-            }
-            .cell {
-                min-width: 22px;
-                padding: 0 1px;
-                border-bottom-width: 2px;
-            }
-            .cell .letter {
-                font-size: 1.3rem;
-                min-height: 1.5rem;
-            }
-            .cell .number-hint {
-                font-size: 0.4rem;
-            }
-            .cell.space {
-                min-width: 10px;
-                width: 10px;
-            }
-
-            .bottom-section {
-                padding: 6px 10px 10px;
-                gap: 3px;
-            }
-            .hint-btn {
-                width: 36px;
-                height: 36px;
-                border-radius: 8px;
-            }
-            .hint-btn .icon {
-                font-size: 1.2rem;
-            }
-            .hint-badge {
-                min-width: 18px;
-                height: 18px;
-                font-size: 0.6rem;
-                top: -4px;
-                right: -4px;
-                border-width: 1.5px;
-            }
-            .keyboard-area {
-                padding: 4px 3px 3px 3px;
-                border-radius: 10px;
-            }
-            .keyboard {
-                gap: 3px;
-            }
-            .key-row {
-                gap: 3px 2px;
-            }
-            .key {
-                width: 26px;
-                height: 30px;
-                font-size: 0.65rem;
-                border-radius: 4px;
-            }
-            .nav-arrow {
-                width: 26px;
-                height: 30px;
-                font-size: 0.85rem;
-            }
-        }
-
-        /* Очень маленькие экраны (телефоны и маленькие ноутбуки) */
-        @media (max-height: 600px) {
-            .game-container {
-                max-height: 100vh;
-                border-radius: 16px;
-            }
-            .top-section {
-                padding: 4px 8px;
-                border-radius: 16px 16px 0 0;
-            }
-            .top-section .mistakes-group {
-                font-size: 0.65rem;
-                gap: 4px;
-            }
-            .mistake-circle {
-                width: 8px;
-                height: 8px;
-            }
-            .icon-btn {
-                font-size: 0.9rem;
-            }
-            .icon-btn.home-btn {
-                font-size: 1.1rem;
-            }
-
-            .middle-section {
-                padding: 4px 4px;
-                min-height: 30px;
-            }
-            .phrase-row {
-                padding: 2px 2px;
-                gap: 3px 2px;
-            }
-            .cell {
-                min-width: 18px;
-                padding: 0 1px;
-                border-bottom-width: 2px;
-            }
-            .cell .letter {
-                font-size: 1.0rem;
-                min-height: 1.2rem;
-            }
-            .cell .number-hint {
-                font-size: 0.35rem;
-            }
-            .cell.space {
-                min-width: 8px;
-                width: 8px;
-            }
-
-            .bottom-section {
-                padding: 4px 6px 6px;
-                gap: 2px;
-            }
-            .hint-btn {
-                width: 30px;
-                height: 30px;
-                border-radius: 6px;
-            }
-            .hint-btn .icon {
-                font-size: 1.0rem;
-            }
-            .hint-badge {
-                min-width: 16px;
-                height: 16px;
-                font-size: 0.5rem;
-                top: -3px;
-                right: -3px;
-                border-width: 1.5px;
-            }
-            .keyboard-area {
-                padding: 2px;
-                border-radius: 6px;
-            }
-            .keyboard {
-                gap: 2px;
-            }
-            .key-row {
-                gap: 2px 1px;
-            }
-            .key {
-                width: 22px;
-                height: 26px;
-                font-size: 0.55rem;
-                border-radius: 4px;
-            }
-            .nav-arrow {
-                width: 22px;
-                height: 26px;
-                font-size: 0.7rem;
-            }
-        }
-
-        /* Большие экраны (десктоп) */
-        @media (min-width: 600px) and (min-height: 700px) {
-            .game-container {
-                max-height: 780px;
-                height: 90vh; /* не на всю высоту, чтобы было красиво */
-            }
-        }
+        .rules-item .dot { font-size: 1.0rem; color: #8a7a5a; flex-shrink: 0; width: 20px; text-align: center; margin-top: 2px; }
+        .rules-item .text { flex: 1; }
+        .rules-item strong { color: #5a4a3a; }
+        .rules-item .highlight { background: #f0e8dc; padding: 0 4px; border-radius: 4px; font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="game-container" id="app">
-        <!-- Верхняя секция -->
-        <div class="top-section">
-            <button class="icon-btn home-btn" id="homeBtn" aria-label="Уровни">⌂</button>
-            <div class="mistakes-group">
-                <span>Ошибки</span>
-                <div class="mistakes-indicators" id="mistakesIndicators">
-                    <span class="mistake-circle" data-index="0"></span>
-                    <span class="mistake-circle" data-index="1"></span>
-                    <span class="mistake-circle" data-index="2"></span>
+
+    <div class="scale-wrapper" id="scaleWrapper">
+        <div class="game-container" id="app">
+            <div class="top-section">
+                <div class="left-buttons">
+                    <button class="icon-btn home-btn" id="homeBtn" aria-label="Уровни">⌂</button>
+                </div>
+                <div class="mistakes-group">
+                    <span>Ошибки</span>
+                    <div class="mistakes-indicators" id="mistakesIndicators">
+                        <span class="mistake-circle" data-index="0"></span>
+                        <span class="mistake-circle" data-index="1"></span>
+                        <span class="mistake-circle" data-index="2"></span>
+                    </div>
+                </div>
+                <div class="right-buttons">
+                    <button class="icon-btn rules-btn" id="rulesBtn" aria-label="Как играть">?</button>
+                    <button class="icon-btn settings-btn" id="settingsBtn" aria-label="Настройки">⚙</button>
                 </div>
             </div>
-            <button class="icon-btn" id="rulesBtn" aria-label="Как играть">?</button>
-        </div>
-
-        <!-- Средняя секция – слово с подчёркиванием -->
-        <div class="middle-section">
-            <div class="phrase-row" id="phraseRow"></div>
-        </div>
-
-        <!-- Нижняя секция -->
-        <div class="bottom-section">
-            <div class="hint-wrapper">
-                <div class="hint-container">
-                    <button class="hint-btn" id="hintBtn">
-                        <span class="icon">💡</span>
-                        <span class="hint-badge" id="hintBadge">3</span>
-                    </button>
-                </div>
+            <div class="middle-section">
+                <div class="phrase-row" id="phraseRow"></div>
             </div>
-            <div class="keyboard-area">
-                <div class="keyboard" id="keyboard"></div>
+            <div class="bottom-section">
+                <div class="hint-wrapper">
+                    <div class="hint-container">
+                        <button class="hint-btn" id="hintBtn">
+                            <span class="icon">💡</span>
+                            <span class="hint-badge" id="hintBadge">3</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="keyboard-area">
+                    <div class="keyboard" id="keyboard"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Модальные окна (без изменений) -->
+    <!-- Модальные окна -->
     <div class="modal-overlay" id="rulesModal">
         <div class="modal-box">
-            <div class="modal-title" style="color:#8a7a5a; font-size:1.8rem;">Как играть</div>
+            <div class="modal-title" style="color:#8a7a5a; font-size:1.6rem;">Как играть</div>
             <div class="rules-list">
-                <div class="rules-item">
-                    <span class="dot">•</span>
-                    <span class="text">Каждая буква заменена <strong>числом</strong>.<br>Одинаковые числа — одинаковые буквы.</span>
-                </div>
-                <div class="rules-item">
-                    <span class="dot">•</span>
-                    <span class="text">Нажмите на пропуск, затем на букву. Если угадали — заполнятся <strong>все</strong> такие же ячейки.</span>
-                </div>
-                <div class="rules-item">
-                    <span class="dot">•</span>
-                    <span class="text">Серые клавиши — буквы, которых нет в этой фразе.</span>
-                </div>
-                <div class="rules-item">
-                    <span class="dot">•</span>
-                    <span class="text">Можно сделать <strong>3 ошибки</strong>. Не знаете букву — нажмите <span class="highlight">подсказку</span>.</span>
-                </div>
-                <div class="rules-item">
-                    <span class="dot">•</span>
-                    <span class="text">Разгадайте всю фразу, чтобы пройти уровень!</span>
-                </div>
+                <div class="rules-item"><span class="dot">•</span><span class="text">Каждая буква заменена <strong>числом</strong>.<br>Одинаковые числа — одинаковые буквы.</span></div>
+                <div class="rules-item"><span class="dot">•</span><span class="text">Нажмите на пропуск, затем на букву. Если угадали — заполнятся <strong>все</strong> такие же ячейки.</span></div>
+                <div class="rules-item"><span class="dot">•</span><span class="text">Серые клавиши — буквы, которых нет в этой фразе.</span></div>
+                <div class="rules-item"><span class="dot">•</span><span class="text">Можно сделать <strong>3 ошибки</strong>. Не знаете букву — нажмите <span class="highlight">💡 подсказку</span>.</span></div>
+                <div class="rules-item"><span class="dot">•</span><span class="text">Разгадайте всю фразу, чтобы пройти уровень!</span></div>
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn rules-btn-close" id="rulesCloseBtn">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <div class="modal-title" style="font-size:1.6rem;">Настройки</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #e2d5c4; margin-top:12px;">
+                <span style="font-size:1.0rem; color:#3d3328; font-weight:500;">Звук</span>
+                <label class="switch">
+                    <input type="checkbox" id="soundToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="modal-buttons" style="margin-top:16px;">
+                <button class="modal-btn close-settings" id="settingsCloseBtn">Закрыть</button>
             </div>
         </div>
     </div>
@@ -978,9 +611,9 @@
             <div class="modal-word" id="modalWord">—</div>
             <div class="modal-difficulty" id="modalDifficulty">Отлично!</div>
             <div class="modal-bonus">💡 +2 за уровень</div>
-            <div class="modal-buttons">
+            <div class="modal-buttons" style="flex-direction: column; gap: 8px; align-items: stretch;">
                 <button class="modal-btn secondary" id="winLevelsBtn">Уровни</button>
-                <button class="modal-btn primary" id="modalNextBtn">Дальше</button>
+                <button class="modal-btn retry" id="modalNextBtn">Дальше</button>
             </div>
         </div>
     </div>
@@ -989,33 +622,115 @@
         <div class="modal-box">
             <div class="modal-title lose">Ошибки закончились</div>
             <div class="modal-subtitle">Вы использовали все 3 ошибки.</div>
-            <div class="modal-word" id="loseWord" style="font-size:1.8rem; margin:4px auto 12px;">—</div>
-            <div class="modal-buttons" style="flex-direction:column; align-items:stretch; gap:10px;">
+            <div class="modal-word" id="loseWord" style="font-size:1.6rem; margin:2px auto 10px;">—</div>
+            <div class="modal-buttons" style="flex-direction: column; gap: 8px; align-items: stretch;">
                 <button class="modal-btn ad" id="loseContinueBtn">Продолжить — посмотреть рекламу</button>
-                <div style="display:flex; gap:10px; justify-content:center;">
-                    <button class="modal-btn danger" id="loseRetryBtn">Ещё раз</button>
-                    <button class="modal-btn secondary" id="loseLevelsBtn">Уровни</button>
-                </div>
+                <button class="modal-btn retry" id="loseRetryBtn">Ещё раз</button>
+                <button class="modal-btn secondary" id="loseLevelsBtn">Уровни</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="levelsModal">
         <div class="modal-box">
-            <div class="modal-title" style="color:#8a7a5a; font-size:1.8rem;">Криптограмма</div>
+            <div class="modal-title" style="color:#8a7a5a; font-size:1.6rem;">Криптограмма</div>
             <div class="modal-subtitle-levels" id="levelsSubtitle">Уровень 1 · Очень легко</div>
             <div class="levels-grid" id="levelsGrid"></div>
             <div class="modal-buttons modal-buttons-levels">
-                <button class="modal-btn secondary" id="levelsCloseBtn">Закрыть</button>
+                <button class="modal-btn close-levels" id="levelsCloseBtn">Закрыть</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== JavaScript без изменений =====
         (function() {
             'use strict';
 
+            // ===== МАСШТАБИРОВАНИЕ (вписываем в экран без обрезания) =====
+            function scaleGame() {
+                const wrapper = document.getElementById('scaleWrapper');
+                if (!wrapper) return;
+
+                const gameWidth = 450;
+                const gameHeight = 600;
+                const winWidth = window.innerWidth;
+                const winHeight = window.innerHeight;
+
+                const paddingX = 4;
+                const paddingY = 10;
+
+                const availWidth = winWidth - paddingX * 2;
+                const availHeight = winHeight - paddingY * 2;
+
+                let scaleX = availWidth / gameWidth;
+                let scaleY = availHeight / gameHeight;
+                let scale = Math.min(scaleX, scaleY);
+
+                scale = Math.min(scale, 1.0);
+                scale = Math.max(scale, 0.3);
+
+                wrapper.style.transform = `scale(${scale})`;
+                wrapper.style.width = gameWidth + 'px';
+                wrapper.style.height = gameHeight + 'px';
+            }
+
+            window.addEventListener('load', scaleGame);
+            window.addEventListener('resize', scaleGame);
+            const observer = new MutationObserver(scaleGame);
+            observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+
+            // ===== ЗВУК (Web Audio API) =====
+            let audioCtx = null;
+
+            function getAudioContext() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                return audioCtx;
+            }
+
+            function playTone(freq, duration, type, volume) {
+                if (!soundToggle || !soundToggle.checked) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type || 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gain.gain.setValueAtTime(volume || 0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) { /* ignore */ }
+            }
+
+            function playSound(type) {
+                switch (type) {
+                    case 'keypress': playTone(600, 0.04, 'sine', 0.15); break;
+                    case 'correct':
+                        playTone(880, 0.15, 'sine', 0.25);
+                        setTimeout(() => playTone(1100, 0.12, 'sine', 0.2), 100);
+                        break;
+                    case 'wrong': playTone(200, 0.3, 'sawtooth', 0.2); break;
+                    case 'hint': playTone(660, 0.2, 'sine', 0.3); break;
+                    case 'win':
+                        const notes = [523, 587, 659, 784, 880, 988, 1047];
+                        notes.forEach((freq, i) => {
+                            setTimeout(() => playTone(freq, 0.12, 'sine', 0.2), i * 80);
+                        });
+                        break;
+                    default: break;
+                }
+            }
+
+            // ===== ИГРОВАЯ ЛОГИКА (без изменений) =====
             const LEVELS = [
                 { phrase: 'КОТ' },
                 { phrase: 'ДОМ' },
@@ -1039,8 +754,10 @@
             let usedLetters = new Set();
             let absentLetters = new Set();
             let completedLevels = new Array(LEVELS.length).fill(false);
+            let winCelebrated = false;
 
             const STORAGE_KEY = 'cryptogram_completed';
+            const SOUND_KEY = 'cryptogram_sound';
 
             function loadProgress() {
                 try {
@@ -1060,7 +777,20 @@
                 } catch (e) {}
             }
 
-            // ===== DOM =====
+            function loadSoundSetting() {
+                try {
+                    const val = localStorage.getItem(SOUND_KEY);
+                    if (val !== null) return val === 'true';
+                } catch (e) {}
+                return true;
+            }
+
+            function saveSoundSetting(value) {
+                try {
+                    localStorage.setItem(SOUND_KEY, String(value));
+                } catch (e) {}
+            }
+
             const phraseRow = document.getElementById('phraseRow');
             const keyboardEl = document.getElementById('keyboard');
             const hintBtn = document.getElementById('hintBtn');
@@ -1072,6 +802,10 @@
             const loseModal = document.getElementById('loseModal');
             const levelsModal = document.getElementById('levelsModal');
             const rulesModal = document.getElementById('rulesModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+            const soundToggle = document.getElementById('soundToggle');
             const rulesBtn = document.getElementById('rulesBtn');
             const rulesCloseBtn = document.getElementById('rulesCloseBtn');
 
@@ -1090,13 +824,49 @@
 
             let previousModal = null;
 
+            function createConfetti() {
+                const oldContainer = document.querySelector('.confetti-container');
+                if (oldContainer) oldContainer.remove();
+                const container = document.createElement('div');
+                container.className = 'confetti-container';
+                document.body.appendChild(container);
+                const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#5f27cd', '#ff9ff3', '#54a0ff', '#ff9f43'];
+                const pieces = 100;
+                for (let i = 0; i < pieces; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    const size = Math.random() * 6 + 3;
+                    piece.style.width = size + 'px';
+                    piece.style.height = size + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.top = '-10%';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    piece.style.animationDelay = (Math.random() * 1.2) + 's';
+                    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(piece);
+                }
+                setTimeout(() => { if (container.parentNode) container.remove(); }, 4000);
+            }
+
+            function initSoundToggle() {
+                const isSoundOn = loadSoundSetting();
+                soundToggle.checked = isSoundOn;
+                soundToggle.addEventListener('change', function() {
+                    saveSoundSetting(this.checked);
+                });
+            }
+
+            function showSettings() { settingsModal.classList.add('active'); }
+            function hideSettings() { settingsModal.classList.remove('active'); }
             function showRules() { rulesModal.classList.add('active'); }
             function hideRules() { rulesModal.classList.remove('active'); }
 
             function checkFirstLaunch() {
                 const hasSeenRules = localStorage.getItem('cryptogram_rules_seen');
                 if (!hasSeenRules) {
-                    setTimeout(() => { showRules(); }, 500);
+                    setTimeout(() => { showRules(); }, 400);
                     localStorage.setItem('cryptogram_rules_seen', 'true');
                 }
             }
@@ -1138,23 +908,17 @@
 
             function findNextActive(start = 0) {
                 for (let i = start; i < letters.length; i++) {
-                    if (!letters[i].isSpace && !letters[i].revealed) {
-                        return i;
-                    }
+                    if (!letters[i].isSpace && !letters[i].revealed) return i;
                 }
                 return -1;
             }
 
             function findPrevActive(start) {
                 for (let i = start - 1; i >= 0; i--) {
-                    if (!letters[i].isSpace && !letters[i].revealed) {
-                        return i;
-                    }
+                    if (!letters[i].isSpace && !letters[i].revealed) return i;
                 }
                 for (let i = letters.length - 1; i >= 0; i--) {
-                    if (!letters[i].isSpace && !letters[i].revealed) {
-                        return i;
-                    }
+                    if (!letters[i].isSpace && !letters[i].revealed) return i;
                 }
                 return -1;
             }
@@ -1167,26 +931,84 @@
             function updateMistakesIndicators() {
                 const circles = mistakesIndicators.querySelectorAll('.mistake-circle');
                 circles.forEach((circle, idx) => {
-                    if (idx < mistakes) {
-                        circle.classList.add('filled');
-                    } else {
-                        circle.classList.remove('filled');
-                    }
+                    if (idx < mistakes) circle.classList.add('filled');
+                    else circle.classList.remove('filled');
                 });
+            }
+
+            function renderKeyboard() {
+                keyboardEl.innerHTML = '';
+                const rows = ['ЙЦУКЕНГШЩЗХЪ', 'ФЫВАПРОЛДЖЭ', 'ЯЧСМИТЬБЮЁ'];
+                rows.forEach((row, rowIndex) => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'key-row';
+                    if (rowIndex === rows.length - 1) {
+                        const leftArrow = document.createElement('div');
+                        leftArrow.className = 'nav-arrow';
+                        leftArrow.textContent = '◀';
+                        leftArrow.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            moveToPrevCell();
+                        });
+                        rowDiv.appendChild(leftArrow);
+                    }
+                    for (const ch of row) {
+                        const key = document.createElement('div');
+                        key.className = 'key';
+                        key.textContent = ch;
+                        key.dataset.letter = ch;
+                        if (usedLetters.has(ch)) key.classList.add('used');
+                        else if (absentLetters.has(ch)) key.classList.add('absent');
+                        key.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            handleKeyPress(ch);
+                        });
+                        rowDiv.appendChild(key);
+                    }
+                    if (rowIndex === rows.length - 1) {
+                        const rightArrow = document.createElement('div');
+                        rightArrow.className = 'nav-arrow';
+                        rightArrow.textContent = '▶';
+                        rightArrow.addEventListener('click', function() {
+                            if (gameFinished) return;
+                            moveToNextCell();
+                        });
+                        rowDiv.appendChild(rightArrow);
+                    }
+                    keyboardEl.appendChild(rowDiv);
+                });
+            }
+
+            function updateKeyboardState() {
+                const allKeys = document.querySelectorAll('.key[data-letter]');
+                allKeys.forEach(key => {
+                    const letter = key.dataset.letter;
+                    key.classList.remove('used', 'absent');
+                    if (usedLetters.has(letter)) key.classList.add('used');
+                    else if (absentLetters.has(letter)) key.classList.add('absent');
+                });
+            }
+
+            function flashKey(letter, type, callback) {
+                const keyEl = document.querySelector(`.key[data-letter="${letter}"]`);
+                if (!keyEl) { if (callback) callback(); return; }
+                keyEl.classList.add(type === 'correct' ? 'correct' : 'wrong');
+                setTimeout(() => {
+                    if (type === 'wrong') keyEl.classList.remove('wrong');
+                    updateKeyboardState();
+                    if (callback) callback();
+                }, 600);
             }
 
             function initLevel(levelIndex) {
                 const levelData = LEVELS[levelIndex];
                 if (!levelData) return;
-
                 const rawPhrase = levelData.phrase;
                 phrase = rawPhrase;
                 const cipher = generateCipher(rawPhrase);
                 cipherMap = cipher;
                 reverseMap = {};
-                for (const [letter, num] of Object.entries(cipher)) {
-                    reverseMap[num] = letter;
-                }
+                for (const [letter, num] of Object.entries(cipher)) reverseMap[num] = letter;
 
                 letters = [];
                 for (const ch of rawPhrase) {
@@ -1207,6 +1029,7 @@
                 gameFinished = false;
                 usedLetters = new Set();
                 absentLetters = new Set();
+                winCelebrated = false;
 
                 const allLetters = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
                 const present = new Set(Object.keys(cipher));
@@ -1217,9 +1040,7 @@
 
                 const indices = [];
                 for (let i = 0; i < letters.length; i++) {
-                    if (!letters[i].isSpace) {
-                        indices.push(i);
-                    }
+                    if (!letters[i].isSpace) indices.push(i);
                 }
                 const total = indices.length;
                 if (total > 0) {
@@ -1233,23 +1054,21 @@
                     const revealedIndices = indices.slice(0, toReveal);
                     for (const idx of revealedIndices) {
                         letters[idx].revealed = true;
-                    }
-                    for (const idx of revealedIndices) {
                         const letter = letters[idx].char;
                         if (letter) usedLetters.add(letter);
                     }
                 }
 
                 activeCellIndex = findNextActive(0);
-                if (activeCellIndex === -1) {
-                    gameFinished = true;
-                }
+                if (activeCellIndex === -1) gameFinished = true;
 
                 winModal.classList.remove('active');
                 loseModal.classList.remove('active');
                 levelsModal.classList.remove('active');
+                settingsModal.classList.remove('active');
                 previousModal = null;
 
+                renderKeyboard();
                 updateUI();
                 hintBtn.disabled = false;
             }
@@ -1271,87 +1090,218 @@
                             letterSpan.textContent = '\u00A0';
                         }
                         cell.appendChild(letterSpan);
-
                         const numSpan = document.createElement('div');
                         numSpan.className = 'number-hint';
                         numSpan.textContent = letters[i].number;
                         cell.appendChild(numSpan);
-
                         if (i === activeCellIndex && !gameFinished) {
                             cell.classList.add('active');
                         }
+                        cell.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (gameFinished) return;
+                            const idx = i;
+                            if (letters[idx].isSpace) return;
+                            if (letters[idx].revealed) {
+                                if (activeCellIndex === idx) activeCellIndex = -1;
+                                else activeCellIndex = idx;
+                            } else {
+                                activeCellIndex = idx;
+                            }
+                            updateUI();
+                        });
                     }
                     phraseRow.appendChild(cell);
                 }
             }
 
-            function renderKeyboard() {
-                keyboardEl.innerHTML = '';
-                const rows = [
-                    'ЙЦУКЕНГШЩЗХЪ',
-                    'ФЫВАПРОЛДЖЭ',
-                    'ЯЧСМИТЬБЮЁ'
-                ];
-
-                rows.forEach((row, rowIndex) => {
-                    const rowDiv = document.createElement('div');
-                    rowDiv.className = 'key-row';
-
-                    if (rowIndex === rows.length - 1) {
-                        const leftArrow = document.createElement('div');
-                        leftArrow.className = 'nav-arrow';
-                        leftArrow.textContent = '◀';
-                        leftArrow.addEventListener('click', function() {
-                            if (gameFinished) return;
-                            moveToPrevCell();
-                        });
-                        rowDiv.appendChild(leftArrow);
-                    }
-
-                    for (const ch of row) {
-                        const key = document.createElement('div');
-                        key.className = 'key';
-                        key.textContent = ch;
-
-                        if (usedLetters.has(ch)) {
-                            key.classList.add('used');
-                        } else if (absentLetters.has(ch)) {
-                            key.classList.add('absent');
-                        }
-
-                        key.addEventListener('click', function() {
-                            if (gameFinished) return;
-                            handleKeyPress(ch);
-                        });
-
-                        rowDiv.appendChild(key);
-                    }
-
-                    if (rowIndex === rows.length - 1) {
-                        const rightArrow = document.createElement('div');
-                        rightArrow.className = 'nav-arrow';
-                        rightArrow.textContent = '▶';
-                        rightArrow.addEventListener('click', function() {
-                            if (gameFinished) return;
-                            moveToNextCell();
-                        });
-                        rowDiv.appendChild(rightArrow);
-                    }
-
-                    keyboardEl.appendChild(rowDiv);
-                });
-            }
-
             function updateUI() {
                 hintBadge.textContent = totalHints;
-                if (gameFinished || totalHints <= 0) {
-                    hintBtn.disabled = true;
-                } else {
-                    hintBtn.disabled = false;
-                }
+                hintBtn.disabled = (gameFinished || totalHints <= 0);
                 updateMistakesIndicators();
                 renderPhrase();
-                renderKeyboard();
+                updateKeyboardState();
+            }
+
+            function handleKeyPress(letter) {
+                if (gameFinished) return;
+                if (usedLetters.has(letter)) return;
+
+                playSound('keypress');
+
+                if (absentLetters.has(letter)) {
+                    flashKey(letter, 'wrong');
+                    playSound('wrong');
+                    return;
+                }
+
+                if (!cipherMap[letter]) {
+                    flashKey(letter, 'wrong', () => {
+                        absentLetters.add(letter);
+                        updateUI();
+                    });
+                    playSound('wrong');
+                    return;
+                }
+
+                if (activeCellIndex === -1) {
+                    activeCellIndex = findNextActive(0);
+                    if (activeCellIndex === -1) {
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    updateUI();
+                    return;
+                }
+
+                const cell = letters[activeCellIndex];
+                if (cell.isSpace || cell.revealed) {
+                    activeCellIndex = findNextActive(activeCellIndex + 1);
+                    if (activeCellIndex === -1) {
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    updateUI();
+                    return;
+                }
+
+                const expectedNumber = cell.number;
+                const expectedLetter = reverseMap[expectedNumber];
+
+                if (letter === expectedLetter) {
+                    flashKey(letter, 'correct');
+                    playSound('correct');
+                    const num = expectedNumber;
+                    let anyOpened = false;
+                    for (let i = 0; i < letters.length; i++) {
+                        if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
+                            letters[i].revealed = true;
+                            anyOpened = true;
+                        }
+                    }
+                    if (anyOpened) usedLetters.add(letter);
+                    activeCellIndex = findNextActive(0);
+                    if (activeCellIndex === -1) {
+                        gameFinished = true;
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    const won = checkWinCondition();
+                    if (!won) updateUI();
+                    else updateUI();
+                } else {
+                    flashKey(letter, 'wrong', () => {
+                        mistakes++;
+                        playSound('wrong');
+                        if (mistakes >= MAX_MISTAKES) {
+                            gameFinished = true;
+                            revealAll();
+                            showLoseModal();
+                            hintBtn.disabled = true;
+                            updateUI();
+                            return;
+                        } else {
+                            updateUI();
+                        }
+                    });
+                }
+            }
+
+            function revealAll() {
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace) letters[i].revealed = true;
+                }
+                gameFinished = true;
+            }
+
+            function checkWinCondition() {
+                let allRevealed = true;
+                for (const cell of letters) {
+                    if (!cell.isSpace && !cell.revealed) { allRevealed = false; break; }
+                }
+                if (allRevealed) {
+                    gameFinished = true;
+                    hintBtn.disabled = true;
+                    activeCellIndex = -1;
+                    updateUI();
+                    showWinModal();
+                    return true;
+                }
+                return false;
+            }
+
+            function useHint() {
+                if (gameFinished) return;
+                if (totalHints <= 0) return;
+
+                let idx = -1;
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace && !letters[i].revealed) { idx = i; break; }
+                }
+                if (idx === -1) return;
+
+                const num = letters[idx].number;
+                const letter = reverseMap[num];
+                let opened = false;
+                for (let i = 0; i < letters.length; i++) {
+                    if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
+                        letters[i].revealed = true;
+                        opened = true;
+                    }
+                }
+                if (opened) {
+                    usedLetters.add(letter);
+                    totalHints--;
+                    playSound('hint');
+                    flashKey(letter, 'correct');
+                    activeCellIndex = findNextActive(0);
+                    if (activeCellIndex === -1) {
+                        gameFinished = true;
+                        checkWinCondition();
+                        updateUI();
+                        return;
+                    }
+                    const won = checkWinCondition();
+                    if (!won) updateUI();
+                    else updateUI();
+                }
+            }
+
+            function moveToNextCell() {
+                if (gameFinished) return;
+                const nextIdx = findNextActive(activeCellIndex + 1);
+                if (nextIdx === -1) {
+                    const fromStart = findNextActive(0);
+                    if (fromStart !== -1) { activeCellIndex = fromStart; updateUI(); }
+                } else {
+                    activeCellIndex = nextIdx;
+                    updateUI();
+                }
+            }
+
+            function moveToPrevCell() {
+                if (gameFinished) return;
+                const prevIdx = findPrevActive(activeCellIndex);
+                if (prevIdx !== -1) { activeCellIndex = prevIdx; updateUI(); }
+            }
+
+            function goToNextLevel() {
+                winModal.classList.remove('active');
+                const nextLevel = currentLevel + 1;
+                if (nextLevel < LEVELS.length && isLevelUnlocked(nextLevel)) {
+                    currentLevel = nextLevel;
+                    initLevel(currentLevel);
+                } else if (nextLevel >= LEVELS.length) {
+                    completedLevels.fill(false);
+                    saveProgress();
+                    currentLevel = 0;
+                    initLevel(0);
+                } else {
+                    initLevel(currentLevel);
+                }
             }
 
             function renderStars() {
@@ -1359,7 +1309,6 @@
                 let activeStars = 3 - mistakes;
                 if (activeStars < 1) activeStars = 1;
                 if (activeStars > 3) activeStars = 3;
-
                 let html = '';
                 for (let i = 0; i < maxStars; i++) {
                     const active = i < activeStars;
@@ -1383,8 +1332,13 @@
                 winModal.classList.add('active');
                 previousModal = null;
                 hintBadge.textContent = totalHints;
-                if (totalHints <= 0) hintBtn.disabled = true;
-                else hintBtn.disabled = false;
+                hintBtn.disabled = (totalHints <= 0);
+
+                if (!winCelebrated) {
+                    createConfetti();
+                    playSound('win');
+                    winCelebrated = true;
+                }
             }
 
             function showLoseModal() {
@@ -1400,6 +1354,9 @@
                 } else if (loseModal.classList.contains('active')) {
                     previousModal = 'lose';
                     loseModal.classList.remove('active');
+                } else if (settingsModal.classList.contains('active')) {
+                    previousModal = 'settings';
+                    settingsModal.classList.remove('active');
                 } else {
                     previousModal = null;
                 }
@@ -1407,14 +1364,12 @@
                 const total = LEVELS.length;
                 const difficulty = 'Очень легко';
                 levelsSubtitle.textContent = `Уровень ${currentLevel+1} · ${difficulty}`;
-
                 levelsGrid.innerHTML = '';
                 for (let i = 0; i < total; i++) {
                     const cell = document.createElement('div');
                     cell.className = 'level-cell';
                     const unlocked = isLevelUnlocked(i);
                     const completed = completedLevels[i];
-
                     if (!unlocked) {
                         cell.classList.add('locked');
                         cell.innerHTML = `${i+1}<span class="lock-icon">🔒</span>`;
@@ -1433,7 +1388,6 @@
                     }
                     levelsGrid.appendChild(cell);
                 }
-
                 levelsModal.classList.add('active');
             }
 
@@ -1442,10 +1396,7 @@
                 if (previousModal === 'win') {
                     let allRevealed = true;
                     for (const cell of letters) {
-                        if (!cell.isSpace && !cell.revealed) {
-                            allRevealed = false;
-                            break;
-                        }
+                        if (!cell.isSpace && !cell.revealed) { allRevealed = false; break; }
                     }
                     if (gameFinished && allRevealed) {
                         completedLevels[currentLevel] = true;
@@ -1460,193 +1411,21 @@
                     } else {
                         previousModal = null;
                     }
-                }
-            }
-
-            function handleKeyPress(letter) {
-                if (gameFinished) return;
-                if (usedLetters.has(letter)) return;
-                if (absentLetters.has(letter)) {
-                    absentLetters.add(letter);
-                    updateUI();
-                    return;
-                }
-                if (!cipherMap[letter]) {
-                    absentLetters.add(letter);
-                    updateUI();
-                    return;
-                }
-
-                if (activeCellIndex === -1) return;
-
-                const cell = letters[activeCellIndex];
-                if (cell.isSpace || cell.revealed) {
-                    activeCellIndex = findNextActive(activeCellIndex + 1);
-                    if (activeCellIndex === -1) {
-                        checkWinCondition();
-                        updateUI();
-                        return;
-                    }
-                    updateUI();
-                    return;
-                }
-
-                const expectedNumber = cell.number;
-                const expectedLetter = reverseMap[expectedNumber];
-
-                if (letter === expectedLetter) {
-                    const num = expectedNumber;
-                    let anyOpened = false;
-                    for (let i = 0; i < letters.length; i++) {
-                        if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
-                            letters[i].revealed = true;
-                            anyOpened = true;
-                        }
-                    }
-                    if (anyOpened) usedLetters.add(letter);
-                    activeCellIndex = findNextActive(0);
-                    if (activeCellIndex === -1) {
-                        gameFinished = true;
-                        checkWinCondition();
-                        updateUI();
-                        return;
-                    }
-                    const won = checkWinCondition();
-                    if (!won) updateUI();
-                    else updateUI();
+                } else if (previousModal === 'settings') {
+                    settingsModal.classList.add('active');
+                    previousModal = null;
                 } else {
-                    mistakes++;
-                    if (mistakes >= MAX_MISTAKES) {
-                        gameFinished = true;
-                        revealAll();
-                        showLoseModal();
-                        hintBtn.disabled = true;
-                        updateUI();
-                        return;
-                    } else {
-                        updateUI();
-                    }
-                }
-            }
-
-            function revealAll() {
-                for (let i = 0; i < letters.length; i++) {
-                    if (!letters[i].isSpace) letters[i].revealed = true;
-                }
-                gameFinished = true;
-            }
-
-            function checkWinCondition() {
-                let allRevealed = true;
-                for (const cell of letters) {
-                    if (!cell.isSpace && !cell.revealed) {
-                        allRevealed = false;
-                        break;
-                    }
-                }
-                if (allRevealed) {
-                    gameFinished = true;
-                    hintBtn.disabled = true;
-                    activeCellIndex = -1;
-                    updateUI();
-                    showWinModal();
-                    return true;
-                }
-                return false;
-            }
-
-            function useHint() {
-                if (gameFinished) return;
-                if (totalHints <= 0) return;
-
-                let idx = -1;
-                for (let i = 0; i < letters.length; i++) {
-                    if (!letters[i].isSpace && !letters[i].revealed) {
-                        idx = i;
-                        break;
-                    }
-                }
-                if (idx === -1) return;
-
-                const num = letters[idx].number;
-                const letter = reverseMap[num];
-                let opened = false;
-
-                for (let i = 0; i < letters.length; i++) {
-                    if (!letters[i].isSpace && letters[i].number === num && !letters[i].revealed) {
-                        letters[i].revealed = true;
-                        opened = true;
-                    }
-                }
-
-                if (opened) {
-                    usedLetters.add(letter);
-                    totalHints--;
-                    activeCellIndex = findNextActive(0);
-                    if (activeCellIndex === -1) {
-                        gameFinished = true;
-                        checkWinCondition();
-                        updateUI();
-                        return;
-                    }
-                    const won = checkWinCondition();
-                    if (!won) {
-                        updateUI();
-                    } else {
-                        updateUI();
-                    }
-                }
-            }
-
-            function moveToNextCell() {
-                if (gameFinished) return;
-                const nextIdx = findNextActive(activeCellIndex + 1);
-                if (nextIdx === -1) {
-                    const fromStart = findNextActive(0);
-                    if (fromStart !== -1) {
-                        activeCellIndex = fromStart;
-                        updateUI();
-                    }
-                } else {
-                    activeCellIndex = nextIdx;
-                    updateUI();
-                }
-            }
-
-            function moveToPrevCell() {
-                if (gameFinished) return;
-                const prevIdx = findPrevActive(activeCellIndex);
-                if (prevIdx !== -1) {
-                    activeCellIndex = prevIdx;
-                    updateUI();
-                }
-            }
-
-            function goToNextLevel() {
-                winModal.classList.remove('active');
-                const nextLevel = currentLevel + 1;
-                if (nextLevel < LEVELS.length && isLevelUnlocked(nextLevel)) {
-                    currentLevel = nextLevel;
-                    initLevel(currentLevel);
-                } else if (nextLevel >= LEVELS.length) {
-                    completedLevels.fill(false);
-                    saveProgress();
-                    currentLevel = 0;
-                    initLevel(0);
-                } else {
-                    initLevel(currentLevel);
+                    previousModal = null;
                 }
             }
 
             function init() {
                 loadProgress();
+                initSoundToggle();
 
                 let startLevel = 0;
                 for (let i = 0; i < LEVELS.length; i++) {
-                    if (!completedLevels[i]) {
-                        startLevel = i;
-                        break;
-                    }
+                    if (!completedLevels[i]) { startLevel = i; break; }
                 }
                 if (startLevel >= LEVELS.length) startLevel = 0;
                 currentLevel = startLevel;
@@ -1655,29 +1434,20 @@
                 homeBtn.addEventListener('click', openLevelsModal);
                 rulesBtn.addEventListener('click', showRules);
                 rulesCloseBtn.addEventListener('click', hideRules);
-                rulesModal.addEventListener('click', function(e) {
-                    if (e.target === rulesModal) hideRules();
-                });
+                rulesModal.addEventListener('click', function(e) { if (e.target === rulesModal) hideRules(); });
+
+                settingsBtn.addEventListener('click', showSettings);
+                settingsCloseBtn.addEventListener('click', hideSettings);
+                settingsModal.addEventListener('click', function(e) { if (e.target === settingsModal) hideSettings(); });
 
                 hintBtn.addEventListener('click', useHint);
                 modalNextBtn.addEventListener('click', goToNextLevel);
-
                 winLevelsBtn.addEventListener('click', openLevelsModal);
                 loseLevelsBtn.addEventListener('click', openLevelsModal);
-
                 levelsCloseBtn.addEventListener('click', closeLevelsModal);
-                levelsModal.addEventListener('click', function(e) {
-                    if (e.target === levelsModal) closeLevelsModal();
-                });
-
-                loseContinueBtn.addEventListener('click', function() {
-                    loseModal.classList.remove('active');
-                    initLevel(currentLevel);
-                });
-                loseRetryBtn.addEventListener('click', function() {
-                    loseModal.classList.remove('active');
-                    initLevel(currentLevel);
-                });
+                levelsModal.addEventListener('click', function(e) { if (e.target === levelsModal) closeLevelsModal(); });
+                loseContinueBtn.addEventListener('click', function() { loseModal.classList.remove('active'); initLevel(currentLevel); });
+                loseRetryBtn.addEventListener('click', function() { loseModal.classList.remove('active'); initLevel(currentLevel); });
 
                 checkFirstLaunch();
             }
