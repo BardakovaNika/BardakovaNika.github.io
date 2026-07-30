@@ -26,13 +26,13 @@
             justify-content: center;
             align-items: center;
             width: 450px;
-            height: 600px;
+            height: 630px;
             transform-origin: center center;
             flex-shrink: 0;
         }
         .game-container {
             width: 450px;
-            height: 600px;
+            height: 630px;
             background: #fcf7f0;
             border-radius: 24px;
             box-shadow: 0 4px 16px rgba(120,90,60,0.2);
@@ -76,7 +76,7 @@
             background: #f6efe6;
             border-bottom: 1px solid #e2d5c4;
             border-radius: 24px 24px 0 0;
-            height: 60px; /* увеличили высоту, чтобы вместить две строки */
+            height: 60px;
         }
         .top-section .left-buttons, .top-section .right-buttons {
             display: flex;
@@ -642,17 +642,29 @@
         </div>
     </div>
 
+    <!-- НОВОЕ: финальное окно "Все уровни пройдены" -->
+    <div class="modal-overlay" id="allCompletedModal">
+        <div class="modal-box">
+            <div class="modal-title" style="color:#8a7a5a;">🎉 Вы прошли все уровни!</div>
+            <div style="margin: 16px 0; font-size: 1.1rem; color: #3d3328;">Поздравляем! Вы разгадали все криптограммы.</div>
+            <div class="modal-buttons" style="flex-direction: column; gap: 8px; align-items: stretch;">
+                <button class="modal-btn retry" id="resetAllBtn">Начать заново</button>
+                <button class="modal-btn secondary" id="allCompletedLevelsBtn">Уровни</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             'use strict';
 
-            // ===== МАСШТАБИРОВАНИЕ (вписываем в экран без обрезания) =====
+            // ===== МАСШТАБИРОВАНИЕ =====
             function scaleGame() {
                 const wrapper = document.getElementById('scaleWrapper');
                 if (!wrapper) return;
 
                 const gameWidth = 450;
-                const gameHeight = 600;
+                const gameHeight = 630;
                 const winWidth = window.innerWidth;
                 const winHeight = window.innerHeight;
 
@@ -679,7 +691,7 @@
             const observer = new MutationObserver(scaleGame);
             observer.observe(document.body, { attributes: true, childList: true, subtree: true });
 
-            // ===== ЗВУК (Web Audio API) =====
+            // ===== ЗВУК =====
             let audioCtx = null;
 
             function getAudioContext() {
@@ -730,7 +742,7 @@
                 }
             }
 
-            // ===== ИГРОВАЯ ЛОГИКА (без изменений) =====
+            // ===== ИГРОВАЯ ЛОГИКА =====
             const LEVELS = [
                 { phrase: 'КОТ' },
                 { phrase: 'ДОМ' },
@@ -821,6 +833,11 @@
             const levelsSubtitle = document.getElementById('levelsSubtitle');
             const levelsCloseBtn = document.getElementById('levelsCloseBtn');
             const modalStars = document.getElementById('modalStars');
+
+            // Новые элементы
+            const allCompletedModal = document.getElementById('allCompletedModal');
+            const resetAllBtn = document.getElementById('resetAllBtn');
+            const allCompletedLevelsBtn = document.getElementById('allCompletedLevelsBtn');
 
             let previousModal = null;
 
@@ -1066,6 +1083,7 @@
                 loseModal.classList.remove('active');
                 levelsModal.classList.remove('active');
                 settingsModal.classList.remove('active');
+                allCompletedModal.classList.remove('active');
                 previousModal = null;
 
                 renderKeyboard();
@@ -1288,6 +1306,7 @@
                 if (prevIdx !== -1) { activeCellIndex = prevIdx; updateUI(); }
             }
 
+            // ===== НОВАЯ ЛОГИКА ПЕРЕХОДА =====
             function goToNextLevel() {
                 winModal.classList.remove('active');
                 const nextLevel = currentLevel + 1;
@@ -1295,13 +1314,26 @@
                     currentLevel = nextLevel;
                     initLevel(currentLevel);
                 } else if (nextLevel >= LEVELS.length) {
-                    completedLevels.fill(false);
-                    saveProgress();
-                    currentLevel = 0;
-                    initLevel(0);
+                    // Все уровни пройдены — показываем финальное окно
+                    allCompletedModal.classList.add('active');
+                    // Можно запустить конфетти или звук победы
+                    createConfetti();
+                    playSound('win');
                 } else {
+                    // Запасной вариант — перезапустить текущий
                     initLevel(currentLevel);
                 }
+            }
+
+            // ===== СБРОС ВСЕГО ПРОГРЕССА =====
+            function resetAllProgress() {
+                completedLevels.fill(false);
+                saveProgress();
+                currentLevel = 0;
+                allCompletedModal.classList.remove('active');
+                winModal.classList.remove('active');
+                loseModal.classList.remove('active');
+                initLevel(currentLevel);
             }
 
             function renderStars() {
@@ -1348,6 +1380,10 @@
             }
 
             function openLevelsModal() {
+                // Если открыто финальное окно — закрываем его
+                if (allCompletedModal.classList.contains('active')) {
+                    allCompletedModal.classList.remove('active');
+                }
                 if (winModal.classList.contains('active')) {
                     previousModal = 'win';
                     winModal.classList.remove('active');
@@ -1383,6 +1419,7 @@
                             winModal.classList.remove('active');
                             loseModal.classList.remove('active');
                             levelsModal.classList.remove('active');
+                            allCompletedModal.classList.remove('active');
                             previousModal = null;
                         });
                     }
@@ -1417,20 +1454,35 @@
                 } else {
                     previousModal = null;
                 }
+                // Если финальное окно было открыто, не возвращаем его
             }
 
             function init() {
                 loadProgress();
                 initSoundToggle();
 
-                let startLevel = 0;
-                for (let i = 0; i < LEVELS.length; i++) {
-                    if (!completedLevels[i]) { startLevel = i; break; }
+                // Проверяем, все ли уровни пройдены
+                const allCompleted = completedLevels.every(v => v === true);
+                if (allCompleted) {
+                    currentLevel = LEVELS.length - 1;
+                    initLevel(currentLevel);
+                    // Показываем финальное окно после загрузки уровня
+                    setTimeout(() => {
+                        allCompletedModal.classList.add('active');
+                        // Сыграем победный звук и конфетти
+                        createConfetti();
+                        playSound('win');
+                    }, 400);
+                } else {
+                    let startLevel = 0;
+                    for (let i = 0; i < LEVELS.length; i++) {
+                        if (!completedLevels[i]) { startLevel = i; break; }
+                    }
+                    currentLevel = startLevel;
+                    initLevel(currentLevel);
                 }
-                if (startLevel >= LEVELS.length) startLevel = 0;
-                currentLevel = startLevel;
-                initLevel(currentLevel);
 
+                // Обработчики
                 homeBtn.addEventListener('click', openLevelsModal);
                 rulesBtn.addEventListener('click', showRules);
                 rulesCloseBtn.addEventListener('click', hideRules);
@@ -1448,6 +1500,13 @@
                 levelsModal.addEventListener('click', function(e) { if (e.target === levelsModal) closeLevelsModal(); });
                 loseContinueBtn.addEventListener('click', function() { loseModal.classList.remove('active'); initLevel(currentLevel); });
                 loseRetryBtn.addEventListener('click', function() { loseModal.classList.remove('active'); initLevel(currentLevel); });
+
+                // Новые обработчики для финального окна
+                resetAllBtn.addEventListener('click', resetAllProgress);
+                allCompletedLevelsBtn.addEventListener('click', function() {
+                    allCompletedModal.classList.remove('active');
+                    openLevelsModal();
+                });
 
                 checkFirstLaunch();
             }
